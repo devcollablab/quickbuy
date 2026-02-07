@@ -1,5 +1,5 @@
 from fastapi import Depends, HTTPException, status, Header
-from app.auth import get_current_user  # ✅ CORRECT IMPORT
+from app.auth import get_current_user  # CORRECT IMPORT
 
 ADMIN_SECRET_KEY = "SUPER_SECRET_ADMIN_KEY_12345"
 
