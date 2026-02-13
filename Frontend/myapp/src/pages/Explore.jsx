@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronDown, Menu, Loader, X } from 'lucide-react';
 import { urlGetProducts } from '../../endpoints';
 import customAxios from '../components/customAxios';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Explore = () => {
   const [sortBy, setSortBy] = useState('Relevance');
@@ -13,11 +13,17 @@ const Explore = () => {
   const [expandedCategory, setExpandedCategory] = useState(true);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const navigate = useNavigate();
+  const location = useLocation();
+
+const queryParams = new URLSearchParams(location.search);
+const categoryFromNav = queryParams.get("category");
+const searchFromNav = location.state?.search;
+
 
   const categories = [
     'Men',
     'Women',
-    'unisex',
+    'Unisex',
     'Premium',
     'Floral',
     'Wood'
@@ -60,6 +66,51 @@ const Explore = () => {
     fetchProducts();
   }, []);
 
+  useEffect(() => {
+    if (categoryFromNav) {
+      setSelectedCategories([categoryFromNav]);
+    } else {
+      setSelectedCategories([]); // 👈 More / direct visit
+    }
+  }, [categoryFromNav]);
+
+  const filteredProducts = products
+  .filter((product) => {
+    const matchesCategory =
+      selectedCategories.length === 0 ||
+      selectedCategories.some(
+        (cat) =>
+          product.category?.toLowerCase() === cat.toLowerCase()
+      );
+
+    const matchesSearch =
+      !searchFromNav ||
+      product.name?.toLowerCase().includes(searchFromNav.toLowerCase());
+
+    return matchesCategory && matchesSearch;
+  })
+  .sort((a, b) => {
+    if (sortBy === "Price: Low to High") {
+      return Number(a.price) - Number(b.price);
+    }
+
+    if (sortBy === "Price: High to Low") {
+      return Number(b.price) - Number(a.price);
+    }
+
+    if (sortBy === "Newest First") {
+      return new Date(b.created_at) - new Date(a.created_at);
+      // make sure your backend sends created_at
+    }
+
+    // Relevance (default)
+    return 0;
+  });
+
+  
+
+  
+
   const handleClick = (id) => {
     debugger;
     navigate(`/products/${id}`);
@@ -89,14 +140,7 @@ const Explore = () => {
           <X size={24} />
         </button>
 
-        {/* Filters Header */}
-        <div className="mb-6 pt-8 lg:pt-0">
-          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
-            Filters
-          </h2>
-          <p className="text-xs text-gray-500 mt-2">1000+ Products</p>
-        </div>
-
+       
         {/* Category Section */}
         <div className="border-t border-gray-200">
           <button
@@ -114,15 +158,7 @@ const Explore = () => {
 
           {expandedCategory && (
             <div className="pb-4">
-              {/* Search Input */}
-              <div className="mb-4">
-                <input
-                  type="text"
-                  placeholder="Search"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-                />
-              </div>
-
+             
               {/* Category Checkboxes */}
               <div className="space-y-3">
                 {categories.map((category) => (
@@ -146,18 +182,7 @@ const Explore = () => {
           )}
         </div>
 
-        {/* Additional Filter Sections can be added here */}
-        <div className="border-t border-gray-200 mt-6 pt-4">
-          <button className="w-full text-left text-sm font-semibold text-gray-800 hover:text-blue-600 transition py-2">
-            Price Range
-          </button>
-        </div>
-
-        <div className="border-t border-gray-200 mt-6 pt-4">
-          <button className="w-full text-left text-sm font-semibold text-gray-800 hover:text-blue-600 transition py-2">
-            Brand
-          </button>
-        </div>
+      
       </aside>
 
       {/* Main Content */}
@@ -189,8 +214,6 @@ const Explore = () => {
                 <option>Price: Low to High</option>
                 <option>Price: High to Low</option>
                 <option>Newest First</option>
-                <option>Best Sellers</option>
-                <option>Top Rated</option>
               </select>
               <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-600 pointer-events-none" size={18} />
             </div>
@@ -215,7 +238,8 @@ const Explore = () => {
         {/* Product Grid */}
         {!loading && !error && products.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6">
-            {products.map((product) => (
+            
+            {(filteredProducts.length > 0 ? filteredProducts : products).map((product) => (
               <div
                 key={product.id}
                 onClick={() => handleClick(product.id)}
@@ -249,7 +273,7 @@ const Explore = () => {
                   {/* Rating */}
                   <div className="flex items-center gap-2">
                     <span className="bg-green-600 text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
-                      {product.rating || 0}★
+                      {product.rating || 4}★
                     </span>
                     <span className="text-xs text-gray-600">
                       {product.reviews || 'No reviews'}

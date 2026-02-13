@@ -8,6 +8,7 @@ const Signup = ({ isOpen, setIsOpen }) => {
   const [otp, setOtp] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
 
   const closeModal = () => {
     setEmail("");
@@ -26,19 +27,25 @@ const Signup = ({ isOpen, setIsOpen }) => {
       alert("Email and password required");
       return;
     }
-
+  
+    if (passwordError) {
+      alert("Please enter a strong password");
+      return;
+    }
+  
     try {
       await customAxios.post(urlSignup, {
         email,
         password,
       });
-
+  
       alert("OTP sent to your email");
       setOtpSent(true);
     } catch (error) {
       alert(error.response?.data?.message || "Failed to send OTP");
     }
   };
+  
 
   // 2️⃣ Verify OTP
   const verifyOtp = async (e) => {
@@ -67,6 +74,10 @@ setOtpSent(false);
       alert(error.response?.data?.message || "OTP verification failed");
     }
   };
+
+  const passwordRegex =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -110,7 +121,20 @@ setOtpSent(false);
                   <input
                     type={showPassword ? "text" : "password"}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    // onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setPassword(value);
+                    
+                      if (!passwordRegex.test(value)) {
+                        setPasswordError(
+                          "Password must be 8+ chars with uppercase, lowercase, number & special character"
+                        );
+                      } else {
+                        setPasswordError("");
+                      }
+                    }}
+                    
                     className="w-full px-4 py-3 pr-12 border rounded-lg"
                     required
                   />
@@ -123,6 +147,11 @@ setOtpSent(false);
                   </button>
                 </div>
               </div>
+              {passwordError && (
+  <p className="text-red-500 text-xs mt-1">
+    {passwordError}
+  </p>
+)}
 
               {/* Send OTP */}
               {!otpSent && (
