@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, } from 'react-router-dom';
 
 
 
@@ -16,7 +16,7 @@ export default function Navigation() {
     if (category.label === 'More') {
       navigate('/explore');
     } else {
-      console.log('Clicked:', category.label);
+      navigate(`/explore?category=${category.label}`);
     }
   };
 

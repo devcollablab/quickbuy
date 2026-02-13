@@ -4,6 +4,7 @@ import Login from './Login';
 import Signup from './Signup';
 import { useNavigate } from 'react-router-dom';
 import CartModal from './CartModal';
+import { useAuth } from '../context/AuthContext';
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -12,11 +13,22 @@ export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const navigate = useNavigate();
  
+  const { isLoggedIn, logout, user } = useAuth();
 
   const handleSearch = (e) => {
     e.preventDefault();
-    console.log('Search for:', searchQuery);
+  
+    if (searchQuery.trim() !== "") {
+      navigate("/explore", {
+        state: { search: searchQuery }
+      });
+  
+      setSearchQuery(""); // optional: clear input
+    }
   };
+  
+
+  
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
@@ -28,7 +40,7 @@ export default function Header() {
             <h1 className="text-2xl font-bold text-gray-900">Shoppy</h1>
           </div>
 
-          {/* Search Bar - Middle (Hidden on mobile) */}
+          {/* Search Bar */}
           <form onSubmit={handleSearch} className="flex flex-1 mx-4 md:mx-8">
             <div className="relative w-full">
               <input
@@ -46,17 +58,39 @@ export default function Header() {
           {/* Cart and Login - Right */}
           <div className="flex items-center space-x-3 md:space-x-6">
           {/* Login Button - Hidden on mobile */}
-            <button 
-              onClick={() => setIsLoginOpen(true)}
-              className="hidden sm:flex items-center space-x-1 px-4 py-1 rounded-lg
-bg-red-100
-border border-red-300
-text-red-700
-hover:bg-red-200
-transition-colors">
+          {isLoggedIn ? (
+  <div className="hidden sm:flex items-center space-x-3">
+   
+    <button
+      onClick={logout}
+      className="px-4 py-1 rounded-lg
+      bg-red-100
+      border border-red-300
+      text-red-700
+      hover:bg-red-200
+      transition-colors"
+    >
+      Logout
+    </button>
+    <p className="text-gray-700 font-medium">
+  {user}
+</p>
+  </div>
+) : (
+  <button
+    onClick={() => setIsLoginOpen(true)}
+    className="hidden sm:flex items-center space-x-1 px-4 py-1 rounded-lg
+    bg-red-100
+    border border-red-300
+    text-red-700
+    hover:bg-red-200
+    transition-colors"
+  >
+    <span>Login</span>
+  </button>
+  
+)}
 
-              <span>Login</span>
-            </button>
             
             {/* Cart Button */}
             <button 
@@ -74,6 +108,7 @@ transition-colors">
               className="relative text-gray-700 hover:text-blue-600 transition-colors">
               <UserCircle size={22} />
             </button>
+
 
           </div>
         </div>

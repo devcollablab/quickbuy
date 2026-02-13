@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import customAxios from '../components/customAxios';
 import { urlLogin } from '../../endpoints';
+import { useAuth } from '../context/AuthContext';
 
 
 const Login = ({ isOpen, setIsOpen, onOpenSignup }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  
+  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -27,7 +30,7 @@ const Login = ({ isOpen, setIsOpen, onOpenSignup }) => {
       // 🔐 Store tokens
       localStorage.setItem("access_token", response.data.access_token);
       localStorage.setItem("refresh_token", response.data.refresh_token);
-
+      login(response.data.access_token);
   
       // Reset & close modal
       setUsername("");
@@ -47,6 +50,8 @@ const Login = ({ isOpen, setIsOpen, onOpenSignup }) => {
   
 
   const closeModal = () => {
+    setUsername("");
+    setPassword("");
     setIsOpen(false);
   };
 
