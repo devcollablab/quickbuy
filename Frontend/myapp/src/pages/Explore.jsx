@@ -248,7 +248,7 @@ const searchFromNav = location.state?.search;
                 {/* Product Image */}
                 <div className="relative bg-gray-100 h-35 sm:h-48 md:h-64 flex items-center justify-center overflow-hidden">
                   <img
-                    src={product.image || "/src/assets/product1.jpg"}
+                    src={product.image_url}
                     alt={product.name}
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                   />

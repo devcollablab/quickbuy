@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { urlGetMe } from "../../endpoints";
+import {  urlGetProfile } from "../../endpoints";
 
 const AuthContext = createContext();
 
@@ -20,13 +20,13 @@ export const AuthProvider = ({ children }) => {
   const fetchUser = async (token) => {
     debugger;
     try {
-      const res = await axios.get(urlGetMe, {
+      const res = await axios.get(urlGetProfile, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      setUser(res.data.email);
+      setUser(res.data.full_name);
       setIsLoggedIn(true);
     } catch (error) {
       logout(); // token invalid or expired
