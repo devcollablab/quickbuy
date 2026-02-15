@@ -1,10 +1,9 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional, List
+from typing import Optional
 from datetime import datetime
 
-# =========================
-# AUTH / USERS
-# =========================
+
+# ================= AUTH / USERS =================
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -43,9 +42,7 @@ class UserOut(BaseModel):
         from_attributes = True
 
 
-# =========================
-# TOKENS
-# =========================
+# ================= TOKENS =================
 
 class Token(BaseModel):
     access_token: str
@@ -58,9 +55,7 @@ class AdminToken(BaseModel):
     token_type: str = "bearer"
 
 
-# =========================
-# PRODUCTS
-# =========================
+# ================= PRODUCTS =================
 
 class ProductBase(BaseModel):
     name: str
@@ -69,6 +64,7 @@ class ProductBase(BaseModel):
     price: float
     stock: int
     category: Optional[str] = None
+    image_url: Optional[str] = None
 
 
 class ProductCreate(ProductBase):
@@ -82,6 +78,7 @@ class ProductUpdate(BaseModel):
     price: Optional[float] = None
     stock: Optional[int] = None
     category: Optional[str] = None
+    image_url: Optional[str] = None
     is_active: Optional[bool] = None
 
 
@@ -95,9 +92,7 @@ class ProductOut(ProductBase):
         from_attributes = True
 
 
-# =========================
-# CART
-# =========================
+# ================= CART =================
 
 class CartAdd(BaseModel):
     product_id: int
@@ -117,12 +112,10 @@ class CartItemOut(BaseModel):
     subtotal: float
 
 
-# =========================
-# RAZORPAY / PAYMENT
-# =========================
+# ================= RAZORPAY =================
 
 class RazorpayOrderCreate(BaseModel):
-    amount: float  # amount in rupees
+    amount: float
 
 
 class RazorpayVerify(BaseModel):
@@ -131,9 +124,7 @@ class RazorpayVerify(BaseModel):
     razorpay_signature: str
 
 
-# =========================
-# ORDERS
-# =========================
+# ================= ORDERS =================
 
 class OrderItemOut(BaseModel):
     product_id: int
@@ -147,3 +138,48 @@ class OrderOut(BaseModel):
     payment_status: str
     order_status: str
     created_at: datetime
+
+
+# ================= USER PROFILE =================
+
+class UserProfileCreate(BaseModel):
+    full_name: str
+    phone_number: str
+    gender: str
+    address_line: str
+    city: str
+    state: str
+    pincode: str
+    country: str
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+
+
+class UserProfileUpdate(BaseModel):
+    full_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    gender: Optional[str] = None
+    address_line: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    pincode: Optional[str] = None
+    country: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+
+
+class UserProfileOut(BaseModel):
+    full_name: Optional[str]
+    phone_number: Optional[str]
+    gender: Optional[str]
+    address_line: Optional[str]
+    city: Optional[str]
+    state: Optional[str]
+    pincode: Optional[str]
+    country: Optional[str]
+    latitude: Optional[float]
+    longitude: Optional[float]
+    profile_image_url: Optional[str]
+
+    class Config:
+        from_attributes = True

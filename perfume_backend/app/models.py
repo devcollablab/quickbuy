@@ -40,6 +40,9 @@ class Product(Base):
     category = Column(String(100))
     is_active = Column(Boolean, default=True)
 
+    # Product Image (Cloudinary URL)
+    image_url = Column(String(500), nullable=True)
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
@@ -56,7 +59,38 @@ class CartItem(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
-# 🧾 ORDER
+# ================= USER PROFILE =================
+class UserProfile(Base):
+    __tablename__ = "user_profiles"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, unique=True)
+
+    full_name = Column(String(255))
+    phone_number = Column(String(20))
+    gender = Column(String(10))  # Male / Female / Other
+
+    address_line = Column(String(500))
+    city = Column(String(100))
+    state = Column(String(100))
+    pincode = Column(String(20))
+    country = Column(String(100))
+
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
+
+    # Default profile image (admin controlled)
+    profile_image_url = Column(
+        String(500),
+        default="https://res.cloudinary.com/demo/image/upload/v1690000000/default_profile.png"
+    )
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+# ================= ORDER =================
 class Order(Base):
     __tablename__ = "orders"
 
@@ -75,7 +109,6 @@ class Order(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
-# 📦 ORDER ITEM
 class OrderItem(Base):
     __tablename__ = "order_items"
 

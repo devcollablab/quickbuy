@@ -18,3 +18,14 @@ export const urlUpdateProduct = (productId) =>
   `${baseURL}/admin/products/${productId}`;
 export const urlDeleteProduct = (productId) => 
   `${baseURL}/admin/products/${productId}`;  
+
+
+export const urlGetProfile = `${baseURL}/profile/`;
+export const urlUpdateProfile = `${baseURL}/profile/`;
+export const urlCreateProfile = `${baseURL}/profile/`;
+
+export const urlGetCart = `${baseURL}/cart/`;
+export const urlAddToCart = `${baseURL}/cart/add`;
+export const urlUpdateCart = `${baseURL}/cart/update`;
+export const urlDeleteCart = (productId) => 
+  `${baseURL}/cart/remove/${productId}`; 

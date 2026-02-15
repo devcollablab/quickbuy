@@ -23,6 +23,7 @@ const Signup = ({ isOpen, setIsOpen }) => {
 
   // 1️⃣ Send OTP
   const sendOtp = async () => {
+    debugger;
     if (!email || !password) {
       alert("Email and password required");
       return;
