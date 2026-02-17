@@ -80,7 +80,7 @@ export default function Header() {
                 >
                   <UserCircle size={22} />
                   <span>
-                    {user || "User"}
+                  {user?.full_name  || "User"}
                   </span>
                   <ChevronDown size={16} />
                 </button>

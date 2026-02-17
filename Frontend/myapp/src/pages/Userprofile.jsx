@@ -69,6 +69,10 @@ const UserProfile = () => {
 
   // ✅ UPDATE PROFILE
   const saveProfile = async () => {
+    if (!full_name) {
+      alert("Please enter name");
+      return;
+    }
     try {
       const res = await customAxios.put(urlUpdateProfile, userInfo);
       setUserInfo(res.data);
@@ -115,7 +119,7 @@ const UserProfile = () => {
                 />
                 <p className="text-sm text-gray-500 mb-1">Hello,</p>
                 <h2 className="text-lg font-bold text-gray-900">
-                  {userInfo.full_name || user?.email || "User"}
+                  {userInfo.full_name || "User"}
                 </h2>
               </div>
             </div>
@@ -209,6 +213,7 @@ const UserProfile = () => {
             disabled={!editMode.personalInfo}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100 focus:ring-2 focus:ring-blue-500"
             placeholder="Enter full name"
+            required
           />
         </div>
 
@@ -251,6 +256,7 @@ const UserProfile = () => {
             disabled={!editMode.personalInfo}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg disabled:bg-gray-100 focus:ring-2 focus:ring-blue-500"
             placeholder="Enter mobile number"
+            required
           />
         </div>
 
@@ -268,6 +274,7 @@ const UserProfile = () => {
             disabled={!editMode.personalInfo}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg disabled:bg-gray-100 focus:ring-2 focus:ring-blue-500"
             placeholder="Street address"
+            required
           />
         </div>
 
@@ -286,6 +293,7 @@ const UserProfile = () => {
               disabled={!editMode.personalInfo}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100 focus:ring-2 focus:ring-blue-500"
               placeholder="City"
+              required
             />
           </div>
 
@@ -302,6 +310,7 @@ const UserProfile = () => {
               disabled={!editMode.personalInfo}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100 focus:ring-2 focus:ring-blue-500"
               placeholder="State"
+              required
             />
           </div>
         </div>
@@ -321,6 +330,7 @@ const UserProfile = () => {
               disabled={!editMode.personalInfo}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100 focus:ring-2 focus:ring-blue-500"
               placeholder="Pincode"
+              required
             />
           </div>
 
@@ -337,6 +347,7 @@ const UserProfile = () => {
               disabled={!editMode.personalInfo}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100 focus:ring-2 focus:ring-blue-500"
               placeholder="Country"
+              required
             />
           </div>
         </div>
