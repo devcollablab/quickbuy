@@ -1,35 +1,47 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
-import {  urlGetProfile } from "../../endpoints";
+import { urlGetMe, urlGetProfile } from "../../endpoints";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null); // will contain full_name
 
-  // On app load
   useEffect(() => {
     const token = localStorage.getItem("access_token");
-
     if (token) {
       fetchUser(token);
     }
   }, []);
 
   const fetchUser = async (token) => {
-    debugger;
     try {
-      const res = await axios.get(urlGetProfile, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      // ✅ get basic user
+      const meRes = await axios.get(urlGetMe, {
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      setUser(res.data.full_name);
+      // ✅ get profile (ONLY ONCE)
+      let profileData = {};
+      try {
+        const profileRes = await axios.get(urlGetProfile, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        profileData = profileRes.data;
+      } catch (err) {
+        // profile may not exist yet — ignore
+      }
+
+      // ✅ MERGED USER OBJECT
+      setUser({
+        ...meRes.data,
+        ...profileData,
+      });
+
       setIsLoggedIn(true);
     } catch (error) {
-      logout(); // token invalid or expired
+      logout();
     }
   };
 
