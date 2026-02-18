@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { ShoppingCart, UserCircle, ChevronDown } from "lucide-react";
 import Login from "./Login";
 import Signup from "./Signup";
+
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import Forgotpassword from "./Forgotpassword";
 
 export default function Header() {
   debugger;
@@ -11,6 +13,8 @@ export default function Header() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignupOpen, setIsSignupOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isForgotOpen, setIsForgotOpen] = useState(false);
+
 
   const navigate = useNavigate();
   const { isLoggedIn, logout, user } = useAuth();
@@ -144,8 +148,16 @@ export default function Header() {
           setIsLoginOpen(false);
           setIsSignupOpen(true);
         }}
+        onOpenForgot={() => {
+          setIsLoginOpen(false);
+          setIsForgotOpen(true);
+        }}
       />
       <Signup isOpen={isSignupOpen} setIsOpen={setIsSignupOpen} />
+      <Forgotpassword
+  isOpen={isForgotOpen}
+  setIsOpen={setIsForgotOpen}
+/>
     </header>
   );
 }

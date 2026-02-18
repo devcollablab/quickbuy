@@ -3,6 +3,10 @@ import config from "./appSettings.json";
 const baseURL = config.baseUrl;
 
 export const urlVerifyotp = `${baseURL}/auth/verify-otp`;
+export const urlResendotp = `${baseURL}/auth/resend-otp`;
+export const urlForgotpass = `${baseURL}/auth/forgot-password`;
+export const urlResetpass = `${baseURL}/auth/reset-password`;
+
 export const urlSignup = `${baseURL}/auth/signup`;
 export const urlLogin = `${baseURL}/auth/login`;
 

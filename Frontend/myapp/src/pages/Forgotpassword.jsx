@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import customAxios from "../components/customAxios";
-import { urlResendotp, urlSignup, urlVerifyotp } from "../../endpoints";
+import { urlForgotpass, urlResendotp, urlResetpass } from "../../endpoints";
 
-const Signup = ({ isOpen, setIsOpen }) => {
+const Forgotpassword = ({ isOpen, setIsOpen }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
@@ -38,8 +38,8 @@ useEffect(() => {
   // 1️⃣ Send OTP
   const sendOtp = async () => {
     debugger;
-    if (!email || !password) {
-      alert("Email and password required");
+    if (!email) {
+      alert("Email required");
       return;
     }
   
@@ -49,9 +49,8 @@ useEffect(() => {
     }
   
     try {
-      await customAxios.post(urlSignup, {
+      await customAxios.post(urlForgotpass, {
         email,
-        password,
       });
   
       alert("OTP sent to your email");
@@ -73,12 +72,13 @@ useEffect(() => {
     }
 
     try {
-      await customAxios.post(urlVerifyotp, {
+      await customAxios.post(urlResetpass, {
         email,
         otp,
+        new_password: password,
       });
 
-      alert("Account created successfully 🎉");
+      alert("password reset successfully 🎉");
       // reset fields
 setEmail("");
 setPassword("");
@@ -125,7 +125,7 @@ setOtpSent(false);
 
           {/* LEFT */}
           <div className="bg-blue-500 text-white p-8 md:w-1/2">
-            <h1 className="text-3xl font-bold mb-4">Sign Up</h1>
+            <h1 className="text-3xl font-bold mb-4">Reset Password</h1>
             <p className="text-blue-100">
               Get access to Orders, Wishlist and more
             </p>
@@ -153,44 +153,7 @@ setOtpSent(false);
                 />
               </div>
 
-              {/* Password */}
-              <div className="mb-5">
-                <label className="font-semibold text-sm">Password</label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    // onChange={(e) => setPassword(e.target.value)}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setPassword(value);
-                    
-                      if (!passwordRegex.test(value)) {
-                        setPasswordError(
-                          "Password must be 8+ chars with uppercase, lowercase, number & special character"
-                        );
-                      } else {
-                        setPasswordError("");
-                      }
-                    }}
-                    
-                    className="w-full px-4 py-3 pr-12 border rounded-lg"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-sm"
-                  >
-                    {showPassword ? "Hide" : "Show"}
-                  </button>
-                </div>
-              </div>
-              {passwordError && (
-  <p className="text-red-500 text-xs mt-1">
-    {passwordError}
-  </p>
-)}
+             
 
               {/* Send OTP */}
               {!otpSent && (
@@ -205,6 +168,46 @@ setOtpSent(false);
 
               {/* OTP */}
               {otpSent && (
+                
+                    <>
+                      {/* Password */}
+                      <div className="mb-5">
+                        <label className="font-semibold text-sm">New Password</label>
+                        <div className="relative">
+                          <input
+                            type={showPassword ? "text" : "password"}
+                            value={password}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setPassword(value);
+                  
+                              if (!passwordRegex.test(value)) {
+                                setPasswordError(
+                                  "Password must be 8+ chars with uppercase, lowercase, number & special character"
+                                );
+                              } else {
+                                setPasswordError("");
+                              }
+                            }}
+                            className="w-full px-4 py-3 pr-12 border rounded-lg"
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-3 text-sm"
+                          >
+                            {showPassword ? "Hide" : "Show"}
+                          </button>
+                        </div>
+                      </div>
+                  
+                      {passwordError && (
+                        <p className="text-red-500 text-xs mt-1">{passwordError}</p>
+                      )}
+                    </>
+                  )}
+                  
   <>
     <div className="mb-5">
       <label className="font-semibold text-sm">OTP</label>
@@ -243,10 +246,10 @@ setOtpSent(false);
       type="submit"
       className="w-full bg-orange-500 text-white py-3 rounded-lg"
     >
-      Verify & Sign Up
+      Reset password
     </button>
   </>
-)}
+
 
             </form>
           </div>
@@ -256,4 +259,4 @@ setOtpSent(false);
   );
 };
 
-export default Signup;
+export default Forgotpassword;

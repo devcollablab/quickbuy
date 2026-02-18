@@ -67,18 +67,39 @@ const UserProfile = () => {
     }
   };
 
+  const validateProfile = () => {
+    const fieldLabels = {
+      full_name: "Full Name",
+      phone_number: "Phone Number",
+      gender: "Gender",
+      address_line: "Address",
+      city: "City",
+      state: "State",
+      pincode: "Pincode",
+      country: "Country",
+    };
+  
+    for (let key in fieldLabels) {
+      if (!userInfo[key] || userInfo[key].toString().trim() === "") {
+        alert(`Please enter ${fieldLabels[key]}`);
+        return false;
+      }
+    }
+  
+    return true;
+  };
+  
+
   // ✅ UPDATE PROFILE
   const saveProfile = async () => {
-    if (!full_name) {
-      alert("Please enter name");
-      return;
-    }
+    if (!validateProfile()) return;
     try {
       const res = await customAxios.put(urlUpdateProfile, userInfo);
       setUserInfo(res.data);
       alert("Profile updated successfully");
     } catch (err) {
       console.error(err);
+      alert("Failed to update profile");
     }
   };
 
