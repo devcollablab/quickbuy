@@ -12,6 +12,8 @@ import Adminsite from "./pages/Adminsite";
 import Productview from "./pages/Productview";
 import Signup from "./pages/Signup";
 import CartPage from "./pages/CartPage";
+import Forgotpassword from "./pages/Forgotpassword";
+
 
 const Home = () => (
   <>
@@ -33,6 +35,7 @@ const App = () => {
         <Route path="/adminsite" element={<Adminsite />} />
         <Route path="/products/:id" element={<Productview />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/forgotpassword" element={<Forgotpassword />} />
         <Route path="/cart" element={<CartPage />} />
       </Routes>
       <Footer />

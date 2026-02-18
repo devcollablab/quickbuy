@@ -4,9 +4,10 @@ import { urlLogin } from '../../endpoints';
 import { useAuth } from '../context/AuthContext';
 
 
-const Login = ({ isOpen, setIsOpen, onOpenSignup }) => {
+const Login = ({ isOpen, setIsOpen, onOpenSignup, onOpenForgot }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   
   const { login } = useAuth();
 
@@ -52,6 +53,7 @@ const Login = ({ isOpen, setIsOpen, onOpenSignup }) => {
   const closeModal = () => {
     setUsername("");
     setPassword("");
+    setShowPassword(false);
     setIsOpen(false);
   };
 
@@ -116,22 +118,38 @@ const Login = ({ isOpen, setIsOpen, onOpenSignup }) => {
                 <label className="block text-gray-700 font-semibold mb-2 text-sm md:text-base">
                   Password
                 </label>
+                <div className="relative">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-sm"
                   required
                 />
+                <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3 text-sm"
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                  </div>
               </div>
 
               {/* Remember Me & Forgot Password */}
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6">
                
-                <a href="#" className="text-blue-500 hover:text-blue-700 text-sm font-semibold">
-                  Forgot Password?
-                </a>
+              <p className="text-right text-sm mb-4">
+  <button
+    type="button"
+    onClick={onOpenForgot}
+    className="text-blue-600 hover:underline"
+  >
+    Forgot Password?
+  </button>
+</p>
+
               </div>
 
               {/* Login Button */}
