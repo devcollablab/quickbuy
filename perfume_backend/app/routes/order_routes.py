@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import CartItem, Product, Order, OrderItem
+from app.models import CartItem, Product, Order, OrderItem, PaymentOrder
 from app.schemas import RazorpayVerify
 from app.auth import get_current_user
 from app.config import settings
@@ -22,6 +22,7 @@ def verify_payment_and_create_order(
     db: Session = Depends(get_db),
     user=Depends(get_current_user)
 ):
+
     # 1️⃣ Verify Razorpay signature
     try:
         client.utility.verify_payment_signature({
@@ -35,12 +36,29 @@ def verify_payment_and_create_order(
             detail="Payment verification failed"
         )
 
-    # 2️⃣ Fetch cart items
-    cart_items = (
-        db.query(CartItem)
-        .filter(CartItem.user_id == user.id)
-        .all()
-    )
+    # 2️⃣ Validate payment order exists in DB
+    payment_order = db.query(PaymentOrder).filter(
+        PaymentOrder.razorpay_order_id == data.razorpay_order_id,
+        PaymentOrder.user_id == user.id
+    ).first()
+
+    if not payment_order:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid payment order"
+        )
+
+    # Prevent duplicate payment processing
+    if payment_order.status == "PAID":
+        raise HTTPException(
+            status_code=400,
+            detail="Payment already processed"
+        )
+
+    # 3️⃣ Fetch cart items
+    cart_items = db.query(CartItem).filter(
+        CartItem.user_id == user.id
+    ).all()
 
     if not cart_items:
         raise HTTPException(
@@ -48,14 +66,14 @@ def verify_payment_and_create_order(
             detail="Cart is empty"
         )
 
-    # 3️⃣ Calculate total safely
+    # 4️⃣ Calculate total safely
     total_amount = 0
+
     for item in cart_items:
-        product = (
-            db.query(Product)
-            .filter(Product.id == item.product_id, Product.is_active == True)
-            .first()
-        )
+        product = db.query(Product).filter(
+            Product.id == item.product_id,
+            Product.is_active == True
+        ).first()
 
         if not product:
             raise HTTPException(
@@ -65,7 +83,7 @@ def verify_payment_and_create_order(
 
         total_amount += product.price * item.quantity
 
-    # 4️⃣ Create order (explicit statuses)
+    # 5️⃣ Create order
     order = Order(
         user_id=user.id,
         razorpay_order_id=data.razorpay_order_id,
@@ -80,9 +98,11 @@ def verify_payment_and_create_order(
     db.commit()
     db.refresh(order)
 
-    # 5️⃣ Create order items & clear cart
+    # 6️⃣ Create order items & clear cart
     for item in cart_items:
-        product = db.query(Product).filter(Product.id == item.product_id).first()
+        product = db.query(Product).filter(
+            Product.id == item.product_id
+        ).first()
 
         order_item = OrderItem(
             order_id=order.id,
@@ -90,10 +110,16 @@ def verify_payment_and_create_order(
             quantity=item.quantity,
             price_at_purchase=product.price
         )
+
         db.add(order_item)
 
+        # remove item from cart
         db.delete(item)
 
+    db.commit()
+
+    # 7️⃣ Mark payment order as PAID
+    payment_order.status = "PAID"
     db.commit()
 
     return {

@@ -33,3 +33,6 @@ export const urlAddToCart = `${baseURL}/cart/add`;
 export const urlUpdateCart = `${baseURL}/cart/update`;
 export const urlDeleteCart = (productId) => 
   `${baseURL}/cart/remove/${productId}`; 
+
+  export const urlCreateOrder = `${baseURL}/payment/create-order`;
+  export const urlVerifyPayment = `${baseURL}/orders/verify-payment`;  
