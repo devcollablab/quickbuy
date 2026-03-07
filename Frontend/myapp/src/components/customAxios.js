@@ -1,23 +1,3 @@
-// import axios from "axios";
-
-// const customAxios = axios.create({
-//   baseURL: import.meta.env.VITE_API_URL,
-//   headers: {
-//     "Content-Type": "application/json",
-//     "x-admin-key": import.meta.env.VITE_ADMIN_KEY
-//   }
-// });
-
-// customAxios.interceptors.request.use((config) => {
-//   const token = localStorage.getItem("token");
-//   if (token) {
-//     config.headers.Authorization = `Bearer ${token}`;
-//   }
-//   return config;
-// });
-
-// export default customAxios;
-
 
 import axios from "axios";
 

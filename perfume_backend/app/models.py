@@ -137,3 +137,19 @@ class OrderItem(Base):
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
     quantity = Column(Integer, nullable=False)
     price_at_purchase = Column(Float, nullable=False)
+
+    # ================= PAYMENT ORDER =================
+class PaymentOrder(Base):
+    __tablename__ = "payment_orders"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    razorpay_order_id = Column(String(255), unique=True, nullable=False)
+
+    amount = Column(Float, nullable=False)
+
+    status = Column(String(20), default="CREATED")  # CREATED / PAID
+
+    created_at = Column(DateTime, default=datetime.utcnow)

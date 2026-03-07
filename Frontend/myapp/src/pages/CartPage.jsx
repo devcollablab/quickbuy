@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import customAxios from "../components/customAxios";
-import { urlDeleteCart, urlGetCart, urlUpdateCart } from "../../endpoints";
+import { urlCreateOrder, urlDeleteCart, urlGetCart, urlUpdateCart, urlVerifyPayment } from "../../endpoints";
 
 
 const CartPage = () => {
@@ -62,6 +62,68 @@ const CartPage = () => {
   if (loading) {
     return <div className="p-10 text-center">Loading cart...</div>;
   }
+
+  const loadRazorpay = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const payNow = async () => {
+
+    const loaded = await loadRazorpay();
+
+  if (!loaded) {
+    alert("Razorpay SDK failed to load");
+    return;
+  }
+    try {
+  
+      // Step 1: Create order from backend
+      const res = await customAxios.post(urlCreateOrder, {
+        amount: totalMRP + platformFee
+      });
+  
+      const data = res.data;
+  
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY,
+        amount: data.amount,
+        currency: data.currency,
+        order_id: data.razorpay_order_id,
+  
+        name: "My Shop",
+        description: "Order Payment",
+  
+        handler: async function (response) {
+  
+          // Step 2: Verify payment
+          const verifyRes = await customAxios.post(urlVerifyPayment, {
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature
+          });
+  
+          alert("Payment Success! Order ID: " + verifyRes.data.order_id);
+  
+        },
+  
+        theme: {
+          color: "#f97316"
+        }
+      };
+  
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+  
+    } catch (error) {
+      console.error("Payment error", error);
+    }
+  };
 
   return (
     <div className="bg-gray-100 min-h-screen p-4 md:p-6">
@@ -147,7 +209,9 @@ const CartPage = () => {
           {/* PLACE ORDER */}
           {cartItems.length > 0 && (
             <div className="bg-white p-4 sticky bottom-0 border rounded shadow-sm flex justify-end">
-              <button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 font-semibold rounded">
+              <button 
+              onClick={payNow}
+              className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 font-semibold rounded">
                 PLACE ORDER
               </button>
             </div>
