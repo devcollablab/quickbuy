@@ -4,6 +4,7 @@ from datetime import datetime
 from app.database import Base
 
 
+# ================= USERS =================
 class User(Base):
     __tablename__ = "users"
 
@@ -18,6 +19,7 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
+# ================= EMAIL OTP =================
 class EmailOTP(Base):
     __tablename__ = "email_otps"
 
@@ -28,6 +30,7 @@ class EmailOTP(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
+# ================= PRODUCTS =================
 class Product(Base):
     __tablename__ = "products"
 
@@ -44,9 +47,14 @@ class Product(Base):
     image_url = Column(String(500), nullable=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now()
+    )
 
 
+# ================= CART =================
 class CartItem(Base):
     __tablename__ = "cart_items"
 
@@ -64,7 +72,6 @@ class UserProfile(Base):
     __tablename__ = "user_profiles"
 
     id = Column(Integer, primary_key=True, index=True)
-
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, unique=True)
 
     full_name = Column(String(255))
@@ -80,17 +87,29 @@ class UserProfile(Base):
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
 
-    # Default profile image (admin controlled)
-    profile_image_url = Column(
-        String(500),
-        default="https://res.cloudinary.com/demo/image/upload/v1690000000/default_profile.png"
-    )
+    # Avatar selected from ProfileAvatar table
+    profile_image_url = Column(String(500), nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
-# ================= ORDER =================
+# ================= PROFILE AVATARS =================
+class ProfileAvatar(Base):
+    __tablename__ = "profile_avatars"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    gender = Column(String(10), nullable=False)  # Male / Female / Other
+    image_url = Column(String(500), nullable=False)
+
+    is_active = Column(Boolean, default=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+# ================= ORDERS =================
 class Order(Base):
     __tablename__ = "orders"
 
@@ -109,6 +128,7 @@ class Order(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
+# ================= ORDER ITEMS =================
 class OrderItem(Base):
     __tablename__ = "order_items"
 

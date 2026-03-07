@@ -2,7 +2,6 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional
 from datetime import datetime
 
-
 # ================= AUTH / USERS =================
 
 class UserCreate(BaseModel):
@@ -183,3 +182,24 @@ class UserProfileOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# ================= PROFILE AVATARS =================
+
+class ProfileAvatarCreate(BaseModel):
+    gender: str
+    image_url: str
+
+
+class ProfileAvatarOut(BaseModel):
+    id: int
+    gender: str
+    image_url: str
+    is_active: bool
+
+    class Config:
+        from_attributes = True
+
+
+class SelectAvatarRequest(BaseModel):
+    avatar_id: int

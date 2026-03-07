@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routes import admin_order_routes
 from app.routes import admin_media_routes
 from app.routes import user_profile_routes
+from app.routes import admin_avatar_routes
+from app.routes import avatar_routes
 
 from app.database import engine, Base
 from app.routes import (
@@ -48,3 +50,5 @@ app.include_router(order_routes.router)
 app.include_router(admin_order_routes.router)
 app.include_router(admin_media_routes.router)
 app.include_router(user_profile_routes.router)
+app.include_router(admin_avatar_routes.router)
+app.include_router(avatar_routes.router)
