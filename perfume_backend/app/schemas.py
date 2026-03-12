@@ -203,3 +203,16 @@ class ProfileAvatarOut(BaseModel):
 
 class SelectAvatarRequest(BaseModel):
     avatar_id: int
+
+class ProductV2Out(BaseModel):
+    id: int
+    name: str
+    brand: str
+    description: Optional[str]
+    price: float
+    stock: int
+    category: Optional[str]
+    images: list[str]
+
+    class Config:
+        from_attributes = True

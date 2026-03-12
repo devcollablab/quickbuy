@@ -2,6 +2,9 @@ from sqlalchemy import Column, Integer, String, Boolean, DateTime, Float, Foreig
 from sqlalchemy.sql import func
 from datetime import datetime
 from app.database import Base
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy.sql import func
+import uuid
 
 
 # ================= USERS =================
@@ -153,3 +156,32 @@ class PaymentOrder(Base):
     status = Column(String(20), default="CREATED")  # CREATED / PAID
 
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class ProductImage(Base):
+    __tablename__ = "product_images"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    image_uuid = Column(
+        String(36),
+        unique=True,
+        nullable=False,
+        default=lambda: str(uuid.uuid4())
+    )
+
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+
+    image_url = Column(String(500), nullable=False)
+
+    position = Column(Integer, default=1)
+
+    created_at = Column(
+        DateTime,
+        server_default=func.now()
+    )
+
+    updated_at = Column(
+        DateTime,
+        server_default=func.now(),
+        onupdate=func.now()
+    )
