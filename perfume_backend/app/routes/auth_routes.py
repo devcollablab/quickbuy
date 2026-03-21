@@ -128,11 +128,19 @@ def verify_otp(data: VerifyOTP, db: Session = Depends(get_db)):
     db.delete(record)
     db.commit()
 
-    access_token = create_access_token({"sub": str(user.id)})
+    access_token = create_access_token(
+    data={
+        "sub": str(user.id),
+        "role": user.role
+    }
+)
     refresh_token = create_access_token(
-        {"sub": str(user.id)},
-        expires_delta=timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
-    )
+    data={
+        "sub": str(user.id),
+        "role": user.role
+    },
+    expires_delta=timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+)
 
     return {
         "access_token": access_token,
@@ -192,11 +200,20 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     if not db_user.is_verified:
         raise HTTPException(status_code=403, detail="Email not verified")
 
-    access_token = create_access_token({"sub": str(db_user.id)})
+    access_token = create_access_token(
+    {
+        "sub": str(db_user.id),
+        "role": db_user.role
+    }
+)
+
     refresh_token = create_access_token(
-        {"sub": str(db_user.id)},
-        expires_delta=timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
-    )
+    {
+        "sub": str(db_user.id),
+        "role": db_user.role
+    },
+    expires_delta=timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+)
 
     return {
         "access_token": access_token,

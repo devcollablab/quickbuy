@@ -43,7 +43,7 @@ def add_to_cart(
     return {"message": "Item added to cart"}
 
 
-# 📄 VIEW CART
+# VIEW CART
 @router.get("/")
 def view_cart(
     db: Session = Depends(get_db),
@@ -68,13 +68,14 @@ def view_cart(
             "name": product.name,
             "price": product.price,
             "quantity": cart_item.quantity,
-            "subtotal": subtotal
+            "subtotal": subtotal,
+            "image_url": product.image_url   
         })
 
     return {"items": response, "total": total}
 
 
-# 🔄 UPDATE QUANTITY
+# UPDATE QUANTITY
 @router.put("/update")
 def update_cart(
     data: CartUpdate,
@@ -102,7 +103,7 @@ def update_cart(
     return {"message": "Cart updated"}
 
 
-# ❌ REMOVE ITEM
+# REMOVE ITEM
 @router.delete("/remove/{product_id}")
 def remove_item(
     product_id: int,

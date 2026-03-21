@@ -116,7 +116,13 @@ def get_product_by_id_v2(product_id: int, db: Session = Depends(get_db)):
         ProductImage.product_id == product.id
     ).order_by(ProductImage.position).all()
 
-    image_urls = [img.image_url for img in images]
+    image_urls = [
+        {
+            "position": img.position,
+            "url": img.image_url
+        }
+        for img in images
+    ]
 
     return {
         "id": product.id,
