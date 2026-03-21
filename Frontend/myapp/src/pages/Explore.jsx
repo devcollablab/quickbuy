@@ -113,12 +113,12 @@ const searchFromNav = location.state?.search;
 
   const handleClick = (id) => {
     debugger;
-    navigate(`/products/${id}`);
+    navigate(`/product/${id}`);
   };
   
 
   return (
-    <div className="flex bg-gray-50 min-h-screen relative">
+    <div className="flex bg-gray-50 min-h-screen relative pt-14 md:pt-16">
        
       {/* Overlay for mobile menu */}
       {isSidebarOpen && (
@@ -129,61 +129,106 @@ const searchFromNav = location.state?.search;
       )}
 
       {/* Sidebar */}
-      <aside className={`${
-        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } lg:translate-x-0 fixed lg:static top-0 left-0 w-80 bg-white p-6 shadow-sm lg:shadow-none h-screen lg:h-auto overflow-y-auto z-40 transition-transform duration-300`}>
-        {/* Mobile Close Button */}
-        <button
-          onClick={() => setIsSidebarOpen(false)}
-          className="lg:hidden absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-        >
-          <X size={24} />
-        </button>
+      <aside className={`
+  ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+  lg:translate-x-0 fixed lg:sticky top-16 left-0
+  w-80 bg-[#eed7b5] backdrop-blur-md
+  p-6 shadow-xl lg:shadow-md
+  h-screen lg:h-[calc(100vh-4rem)]
+  overflow-y-auto z-40
+  transition-transform duration-300
+  border-r border-gray-100
+`}>
+  {/* Mobile Close Button */}
+  <button
+    onClick={() => setIsSidebarOpen(false)}
+    className="lg:hidden absolute top-4 right-4 text-gray-400 hover:text-gray-700"
+  >
+    <X size={24} />
+  </button>
 
-       
-        {/* Category Section */}
-        <div className="border-t border-gray-200">
-          <button
-            onClick={() => setExpandedCategory(!expandedCategory)}
-            className="w-full flex items-center justify-between py-4 text-gray-800 font-semibold hover:text-gray-600 transition"
-          >
-            <span>Category</span>
-            <ChevronDown
-              size={20}
-              className={`transition-transform ${
-                expandedCategory ? 'rotate-180' : ''
-              }`}
-            />
-          </button>
+  <h2 className="text-lg font-semibold text-gray-900 mb-6">
+    Filters
+  </h2>
 
-          {expandedCategory && (
-            <div className="pb-4">
-             
-              {/* Category Checkboxes */}
-              <div className="space-y-3">
-                {categories.map((category) => (
-                  <label
-                    key={category}
-                    className="flex items-center cursor-pointer group"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedCategories.includes(category)}
-                      onChange={() => toggleCategory(category)}
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
-                    />
-                    <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition">
-                      {category}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+  {/* Sort Section */}
+<div className="mb-6">
+  <label className="block text-sm font-semibold text-gray-800 mb-2">
+    Sort By
+  </label>
 
-      
-      </aside>
+  <div className="relative">
+    <select
+      value={sortBy}
+      onChange={(e) => setSortBy(e.target.value)}
+      className="
+        appearance-none w-full
+        px-3 py-2.5 pr-9
+        rounded-lg
+        border border-gray-200
+        bg-gray-50
+        text-sm font-medium text-gray-700
+        focus:outline-none
+        focus:ring-2 focus:ring-blue-500
+        focus:bg-white
+        transition
+        cursor-pointer
+      "
+    >
+      <option>Relevance</option>
+      <option>Price: Low to High</option>
+      <option>Price: High to Low</option>
+      <option>Newest First</option>
+    </select>
+
+    <ChevronDown
+      size={16}
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"
+    />
+  </div>
+</div>
+
+  {/* Category Section */}
+  <div className="border-b pb-4">
+    <button
+      onClick={() => setExpandedCategory(!expandedCategory)}
+      className="w-full flex items-center justify-between py-3 text-gray-800 font-semibold"
+    >
+      <span>Category</span>
+      <ChevronDown
+        size={20}
+        className={`transition-transform ${
+          expandedCategory ? 'rotate-180' : ''
+        }`}
+      />
+    </button>
+
+    {expandedCategory && (
+      <div className="flex flex-wrap gap-2 mt-3">
+        {categories.map((category) => {
+          const active = selectedCategories.includes(category);
+
+          return (
+            <button
+              key={category}
+              onClick={() => toggleCategory(category)}
+              className={`
+                px-3 py-1.5 rounded-full text-sm font-medium
+                transition-all duration-200
+                border
+                ${active
+                  ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                  : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-blue-50"}
+              `}
+            >
+              {category}
+            </button>
+          );
+        })}
+      </div>
+    )}
+  </div>
+</aside>
 
       {/* Main Content */}
       <div className="flex-1 p-4 md:p-6">
@@ -202,22 +247,7 @@ const searchFromNav = location.state?.search;
           </div>
           
           {/* Sort Dropdown */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
-            <span className="text-gray-600 font-medium text-sm">Sort by:</span>
-            <div className="relative inline-block w-full sm:w-auto">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="appearance-none w-full sm:w-auto px-4 py-2 pr-8 border border-gray-300 rounded-lg bg-white text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer text-sm"
-              >
-                <option>Relevance</option>
-                <option>Price: Low to High</option>
-                <option>Price: High to Low</option>
-                <option>Newest First</option>
-              </select>
-              <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-600 pointer-events-none" size={18} />
-            </div>
-          </div>
+          
         </div>
 
         {/* Loading State */}

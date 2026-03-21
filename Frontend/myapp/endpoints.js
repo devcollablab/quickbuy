@@ -15,7 +15,8 @@ export const urlGetProducts = `${baseURL}/products/`;
 
 export const urlGetProductById = (productId) =>
   `${baseURL}/products/${productId}`;
-  
+  export const urlGetProductimages = (productId) =>
+  `${baseURL}/products/v2/${productId}`;  
 
 export const urlCreateProduct = `${baseURL}/admin/products/`;
 export const urlUpdateProduct = (productId) =>
@@ -36,3 +37,8 @@ export const urlDeleteCart = (productId) =>
 
   export const urlCreateOrder = `${baseURL}/payment/create-order`;
   export const urlVerifyPayment = `${baseURL}/orders/verify-payment`;  
+  export const urlMyOrders = `${baseURL}/orders/my-orders`;
+
+  export const urlGetAvatars = `${baseURL}/avatars/`;
+  export const urlChangeAvatar = (avatarId) => 
+  `${baseURL}/avatars/select/${avatarId}`; 

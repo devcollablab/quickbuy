@@ -1,200 +1,213 @@
-import React, { useState } from 'react';
-import customAxios from '../components/customAxios';
-import { urlLogin } from '../../endpoints';
-import { useAuth } from '../context/AuthContext';
+import React, { useState,useEffect } from "react";
+import customAxios from "../components/customAxios";
+import { urlLogin } from "../../endpoints";
+import { useAuth } from "../context/AuthContext";
+import CustomAlert from "../components/CustomAlert";
 
 
 const Login = ({ isOpen, setIsOpen, onOpenSignup, onOpenForgot }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  
+  const [alert, setAlert] = useState({ message: "", type: "success" });
+
   const { login } = useAuth();
+
+  useEffect(() => {
+    if (!isOpen) {
+      resetFields();
+    }
+  }, [isOpen]);
+
+  const resetFields = () => {
+    
+    setUsername?.("");
+    setPassword("");
+    
+    setShowPassword(false);
+    
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
-  
+
     if (!username || !password) {
       alert("Please enter email and password");
       return;
     }
-  
+
     try {
-      debugger;
       const response = await customAxios.post(urlLogin, {
         email: username,
         password: password,
       });
-      alert("Login successfully 🎉");
-      console.log("Login success:", response.data);
-  
-      // 🔐 Store tokens
+
+      setAlert({
+        message: "Login Successful",
+        type: "success",
+      });
+
+      setTimeout(() => {
+        setIsOpen(false);
+      }, 1500);
+
+      // store tokens
       localStorage.setItem("access_token", response.data.access_token);
       localStorage.setItem("refresh_token", response.data.refresh_token);
+
       login(response.data.access_token);
-  
-      // Reset & close modal
+
+      // reset fields
       setUsername("");
       setPassword("");
+
       setIsOpen(false);
-  
     } catch (error) {
       console.error("Login failed:", error);
-  
+
       const message =
-        error.response?.data?.detail || // FastAPI uses 'detail'
-        "Invalid email or password";
-  
+        error.response?.data?.detail || "Invalid email or password";
+
       alert(message);
     }
   };
-  
 
   const closeModal = () => {
     setUsername("");
     setPassword("");
     setShowPassword(false);
     setIsOpen(false);
+    resetFields();
   };
 
-  if (!isOpen) {
-    return null;
-  }
+  
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      {/* Login Modal */}
-      <div className="bg-white rounded-lg shadow-2xl overflow-hidden w-full max-w-2xl max-h-[90vh] overflow-hidden">
-        <div className="flex flex-col md:flex-row">
-          {/* Left Side - Blue Section */}
-          <div className="bg-blue-500 text-white p-6 md:p-12 w-full md:w-1/2 flex flex-col justify-between">
-            <div>
-              <h1 className="text-2xl md:text-4xl font-bold mb-2 md:mb-4">Login</h1>
-              <p className="text-sm md:text-lg text-blue-100 mb-4 md:mb-8">
-                Get access to your Orders, Wishlist and Recommendations
-              </p>
-            </div>
-
-            {/* Illustration Placeholder */}
-            <div className="flex justify-center hidden md:flex">
-              <svg
-                className="w-48 h-48 text-blue-300"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Right Side - Login Form */}
-          <div className="p-6 md:p-12 w-full md:w-1/2 relative">
-            {/* Close Button */}
-            <button
-              onClick={closeModal}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl"
-            >
-              ✕
-            </button>
-
-            <form onSubmit={handleLogin}>
-              {/* Username Input */}
-              <div className="mb-6">
-                <label className="block text-gray-700 font-semibold mb-2 text-sm md:text-base">
-                  Username or Email
-                </label>
-                <input
-                  type="email"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter your email"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-sm"
-                  required
-                />
-              </div>
-
-              {/* Password Input */}
-              <div className="mb-6">
-                <label className="block text-gray-700 font-semibold mb-2 text-sm md:text-base">
-                  Password
-                </label>
-                <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-sm"
-                  required
-                />
-                <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-sm"
-                  >
-                    {showPassword ? "Hide" : "Show"}
-                  </button>
-                  </div>
-              </div>
-
-              {/* Remember Me & Forgot Password */}
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6">
-               
-              <p className="text-right text-sm mb-4">
-  <button
-    type="button"
-    onClick={onOpenForgot}
-    className="text-blue-600 hover:underline"
-  >
-    Forgot Password?
-  </button>
-</p>
-
-              </div>
-
-              {/* Login Button */}
-              <button
-                type="submit"
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg transition duration-300 mb-4 text-sm md:text-base"
-              >
-                Login
-              </button>
-
-              {/* Sign Up Link */}
-              <p className="text-center text-gray-600 text-sm">
-                New to Shoppy?{' '}
-                <button
-  type="button"
-  onClick={() => {
-    if (typeof onOpenSignup === 'function') {
-      onOpenSignup();
-    } else {
-      // fallback: close this modal
-      setIsOpen(false);
-    }
-  }}
-  className="outline-none border-0 bg-transparent text-blue-500 hover:text-blue-700 font-semibold"
->
-  Create an account
-</button>
-              </p>
-            </form>
-
-            {/* Terms & Conditions */}
-            <p className="text-xs text-gray-500 text-center mt-6">
-              By continuing, you agree to Shoppy's{' '}
-              <a href="#" className="text-blue-500 hover:text-blue-700">
-                Terms of Use
-              </a>{' '}
-              and{' '}
-              <a href="#" className="text-blue-500 hover:text-blue-700">
-                Privacy Policy
-              </a>
-            </p>
-          </div>
+    <>
+    <CustomAlert
+      message={alert.message}
+      type={alert.type}
+      onClose={() => setAlert({ message: "" })}
+    />
+    {isOpen && (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-3 sm:p-4">
+  
+      <div className="bg-[#f7f5f2] w-full max-w-md sm:max-w-lg p-6 sm:p-10 shadow-xl relative rounded-sm">
+  
+        {/* Close Button */}
+        <button
+          onClick={closeModal}
+          className="absolute top-3 right-3 text-gray-500 text-lg sm:text-xl"
+        >
+          ✕
+        </button>
+  
+        {/* Brand */}
+        <h1 className="text-center text-2xl sm:text-3xl tracking-[4px] sm:tracking-[6px] mb-8 sm:mb-10 font-serif">
+          LUXE<span className="text-[#c5a46d]">SCENTS</span>
+        </h1>
+  
+        {/* Tabs */}
+        <div className="flex justify-center mb-8 sm:mb-10 border-b text-sm sm:text-base">
+  
+          <button className="text-[#c5a46d] tracking-widest pb-3 border-b-2 border-[#c5a46d] px-6 sm:px-10">
+            LOGIN
+          </button>
+  
+          <button
+            onClick={() => {
+              setIsOpen(false);
+              resetFields();
+              onOpenSignup();
+            }}
+            className="text-gray-500 tracking-widest pb-3 px-6 sm:px-10"
+          >
+            REGISTER
+          </button>
+  
         </div>
+  
+        {/* Form */}
+        <form onSubmit={handleLogin}>
+  
+          {/* Email */}
+          <div className="mb-5 sm:mb-6">
+  
+            <label className="block text-gray-500 tracking-widest text-xs sm:text-sm mb-2">
+              EMAIL
+            </label>
+  
+            <input
+              type="email"
+              required
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="you@example.com"
+              className="w-full border border-gray-300 px-3 sm:px-4 py-2.5 sm:py-3 bg-white focus:outline-none focus:border-[#c5a46d]"
+            />
+  
+          </div>
+  
+          {/* Password */}
+          <div className="mb-5 sm:mb-6">
+  
+            <label className="block text-gray-500 tracking-widest text-xs sm:text-sm mb-2">
+              PASSWORD
+            </label>
+  
+            <div className="relative">
+  
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full border border-gray-300 px-3 sm:px-4 py-2.5 sm:py-3 bg-white focus:outline-none focus:border-[#c5a46d]"
+              />
+  
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-2.5 sm:top-3 text-xs sm:text-sm text-gray-500"
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+  
+            </div>
+  
+          </div>
+  
+          {/* Forgot Password */}
+          <div className="text-right mb-5 sm:mb-6">
+  
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpen(false);
+                resetFields();
+                onOpenForgot();
+              }}
+              className="text-[#c5a46d] text-xs sm:text-sm underline"
+            >
+              Forgot password?
+            </button>
+  
+          </div>
+  
+          {/* Login Button */}
+          <button
+            type="submit"
+            className="w-full bg-[#c5a46d] text-white tracking-widest py-2.5 sm:py-3 text-sm sm:text-base hover:opacity-90 transition"
+          >
+            LOGIN
+          </button>
+  
+        </form>
+  
       </div>
     </div>
+    )}
+    </>
   );
 };
 
