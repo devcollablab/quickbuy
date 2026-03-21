@@ -6,6 +6,7 @@ from app.routes import admin_media_routes
 from app.routes import user_profile_routes
 from app.routes import admin_avatar_routes
 from app.routes import avatar_routes
+from app.routes.admin_auth_routes import router as admin_auth_router
 
 from app.database import engine, Base
 from app.routes import (
@@ -53,3 +54,4 @@ app.include_router(admin_media_routes.router)
 app.include_router(user_profile_routes.router)
 app.include_router(admin_avatar_routes.router)
 app.include_router(avatar_routes.router)
+app.include_router(admin_auth_router)

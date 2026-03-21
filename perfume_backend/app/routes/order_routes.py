@@ -66,7 +66,7 @@ def verify_payment_and_create_order(
             detail="Cart is empty"
         )
 
-    # 4️⃣ Calculate total safely
+    # Calculate total safely
     total_amount = 0
 
     for item in cart_items:
@@ -126,4 +126,55 @@ def verify_payment_and_create_order(
         "message": "Order placed successfully",
         "order_id": order.id,
         "order_status": order.order_status
+    }
+
+@router.get("/my-orders")
+def get_my_orders(
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user)
+):
+    orders = db.query(Order).filter(
+        Order.user_id == user.id
+    ).order_by(Order.id.desc()).all()
+
+    if not orders:
+        return {
+            "message": "No orders found",
+            "orders": []
+        }
+
+    response = []
+
+    for order in orders:
+        order_items = db.query(OrderItem).filter(
+            OrderItem.order_id == order.id
+        ).all()
+
+        products = []
+
+        for item in order_items:
+            product = db.query(Product).filter(
+                Product.id == item.product_id
+            ).first()
+
+            products.append({
+                "product_id": product.id,
+                "name": product.name,
+                "price": item.price_at_purchase,
+                "quantity": item.quantity,
+                "total": item.price_at_purchase * item.quantity,
+                "image_url": product.image_url
+            })
+
+        response.append({
+            "order_id": order.id,
+            "total_amount": order.total_amount,
+            "payment_status": order.payment_status,
+            "order_status": order.order_status,
+            "products": products
+        })
+
+    return {
+        "total_orders": len(response),
+        "orders": response
     }

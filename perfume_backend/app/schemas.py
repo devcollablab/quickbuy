@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 from datetime import datetime
-
+from typing import List, Dict, Any
 # ================= AUTH / USERS =================
 
 class UserCreate(BaseModel):
@@ -212,7 +212,6 @@ class ProductV2Out(BaseModel):
     price: float
     stock: int
     category: Optional[str]
-    images: list[str]
-
+    images: List[Dict[str, Any]]
     class Config:
         from_attributes = True
