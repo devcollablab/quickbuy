@@ -3,6 +3,7 @@ import { ChevronDown, Menu, Loader, X } from 'lucide-react';
 import { urlGetProducts } from '../../endpoints';
 import customAxios from '../components/customAxios';
 import { useNavigate, useLocation } from "react-router-dom";
+import Loading from '../components/Loading';
 
 const Explore = () => {
   const [sortBy, setSortBy] = useState('Relevance');
@@ -18,6 +19,10 @@ const Explore = () => {
 const queryParams = new URLSearchParams(location.search);
 const categoryFromNav = queryParams.get("category");
 const searchFromNav = location.state?.search;
+
+const [priceRange, setPriceRange] = useState([0, 300]);
+const minPrice = 0;
+const maxPrice = 300;
 
 
   const categories = [
@@ -40,7 +45,7 @@ const searchFromNav = location.state?.search;
   // Fetch products from backend
   useEffect(() => {
     const fetchProducts = async () => {
-      debugger;
+      
       try {
         setLoading(true);
         setError(null);
@@ -87,7 +92,11 @@ const searchFromNav = location.state?.search;
       !searchFromNav ||
       product.name?.toLowerCase().includes(searchFromNav.toLowerCase());
 
-    return matchesCategory && matchesSearch;
+      const matchesPrice =
+      Number(product.price) >= priceRange[0] &&
+      Number(product.price) <= priceRange[1];  
+
+    return matchesCategory && matchesSearch && matchesPrice;
   })
   .sort((a, b) => {
     if (sortBy === "Price: Low to High") {
@@ -112,7 +121,7 @@ const searchFromNav = location.state?.search;
   
 
   const handleClick = (id) => {
-    debugger;
+    
     navigate(`/product/${id}`);
   };
   
@@ -228,6 +237,80 @@ const searchFromNav = location.state?.search;
       </div>
     )}
   </div>
+ 
+{/* Price Range Section */}
+<div className="border-b pb-6 mt-6">
+  <h3 className="text-gray-800 font-semibold mb-4">
+    Price Range
+  </h3>
+
+  {/* Price Labels */}
+  <div className="flex justify-between text-sm font-medium text-gray-700 mb-3">
+    <span>₹{priceRange[0]}</span>
+    <span>₹{priceRange[1]}</span>
+  </div>
+
+  {/* Slider */}
+  <div className="relative h-6">
+    
+    {/* Track background */}
+    <div className="absolute top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 rounded-full" />
+
+    {/* Active track */}
+    <div
+      className="absolute top-1/2 -translate-y-1/2 h-1 bg-blue-600 rounded-full"
+      style={{
+        left: `${(priceRange[0] / maxPrice) * 100}%`,
+        right: `${100 - (priceRange[1] / maxPrice) * 100}%`,
+      }}
+    />
+
+    {/* Min slider */}
+    <input
+      type="range"
+      min={minPrice}
+      max={maxPrice}
+      value={priceRange[0]}
+      onChange={(e) =>
+        setPriceRange([
+          Math.min(Number(e.target.value), priceRange[1] - 100),
+          priceRange[1],
+        ])
+      }
+      className="absolute w-full appearance-none pointer-events-none bg-transparent
+                 [&::-webkit-slider-thumb]:pointer-events-auto
+                 [&::-webkit-slider-thumb]:appearance-none
+                 [&::-webkit-slider-thumb]:h-4
+                 [&::-webkit-slider-thumb]:w-4
+                 [&::-webkit-slider-thumb]:rounded-full
+                 [&::-webkit-slider-thumb]:bg-blue-600
+                 [&::-webkit-slider-thumb]:cursor-pointer
+                 [&::-webkit-slider-thumb]:shadow-md"
+    />
+
+    {/* Max slider */}
+    <input
+      type="range"
+      min={minPrice}
+      max={maxPrice}
+      value={priceRange[1]}
+      onChange={(e) =>
+        setPriceRange([
+          priceRange[0],
+          Math.max(Number(e.target.value), priceRange[0] + 100),
+        ])
+      }
+      className="absolute w-full appearance-none bg-transparent
+                 [&::-webkit-slider-thumb]:appearance-none
+                 [&::-webkit-slider-thumb]:h-4
+                 [&::-webkit-slider-thumb]:w-4
+                 [&::-webkit-slider-thumb]:rounded-full
+                 [&::-webkit-slider-thumb]:bg-blue-600
+                 [&::-webkit-slider-thumb]:cursor-pointer
+                 [&::-webkit-slider-thumb]:shadow-md"
+    />
+  </div>
+</div>
 </aside>
 
       {/* Main Content */}
@@ -238,7 +321,7 @@ const searchFromNav = location.state?.search;
             {/* Mobile Filter Button */}
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="lg:hidden flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              className="lg:hidden flex items-center gap-2 px-4 py-2 bg-[#eed7b5] text-black rounded-lg hover:bg-[#f3c073] transition"
             >
               <Menu size={20} />
               <span className="text-sm">Filters</span>
@@ -252,10 +335,11 @@ const searchFromNav = location.state?.search;
 
         {/* Loading State */}
         {loading && (
-          <div className="flex flex-col items-center justify-center py-16">
-            <Loader className="animate-spin text-blue-600 mb-4" size={32} />
-            <p className="text-gray-600 font-medium">Loading products...</p>
-          </div>
+          <Loading text="Loading products..."/>
+          // <div className="flex flex-col items-center justify-center py-16">
+          //   <Loader className="animate-spin text-blue-600 mb-4" size={32} />
+          //   <p className="text-gray-600 font-medium">Loading products...</p>
+          // </div>
         )}
 
         {/* Error State */}

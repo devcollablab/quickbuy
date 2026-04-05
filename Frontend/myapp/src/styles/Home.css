@@ -3,8 +3,8 @@
 /* Hero Slider */
 .hero-slider {
   position: relative;
-  height: 60vh;
-  min-height: 400px;
+  height: 75vh;   /* increased from 60vh */
+  min-height: 500px; /* increased */
   width: 100%;
   overflow: hidden;
   background-color: #000;
@@ -357,13 +357,19 @@
     font-size: 2.5rem;
   }
   .categories-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
+  
   .category-card {
-    height: 300px;
+    height: 180px;
   }
   .hero-slider {
     min-height: 350px;
-    height: 50vh;
+    height: 65vh;
+  }
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
 }

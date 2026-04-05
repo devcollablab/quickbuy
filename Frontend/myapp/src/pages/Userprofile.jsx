@@ -8,7 +8,6 @@ import { useAuth } from "../context/AuthContext";
 import Login from "./Login";
 import Forgotpassword from "./Forgotpassword";
 import Signup from "./Signup";
-import CustomAlert from "../components/CustomAlert";
 import Toast from "../components/Toast";
 
 

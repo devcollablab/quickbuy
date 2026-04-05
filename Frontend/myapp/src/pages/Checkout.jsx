@@ -14,6 +14,9 @@ const Checkout = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
+  const [locationLoading, setLocationLoading] = useState(false);
+const [locationStatus, setLocationStatus] = useState("");
+
   const [formData, setFormData] = useState({
     firstName: "",
     phone: "",
@@ -273,6 +276,51 @@ const Checkout = () => {
     setIsEditing(!isEditing);
   };
 
+  const findMyLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationStatus("Geolocation not supported");
+      return;
+    }
+  
+    setLocationLoading(true);
+    setLocationStatus("Detecting location...");
+  
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+  
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`
+          );
+  
+          const data = await res.json();
+          const addr = data.address || {};
+  
+          setFormData(prev => ({
+            ...prev,
+            address: addr.road || prev.address,
+            city: addr.city || addr.town || addr.village || "",
+            state: addr.state || "",
+            country: addr.country || "",
+            pincode: addr.postcode || ""
+          }));
+  
+          setIsEditing(true); // enable editing after fetch
+          setLocationStatus("Location fetched successfully");
+        } catch (error) {
+          setLocationStatus("Failed to fetch address");
+        }
+  
+        setLocationLoading(false);
+      },
+      () => {
+        setLocationStatus("Permission denied");
+        setLocationLoading(false);
+      }
+    );
+  };
+
   return (
     <div className="checkout-page container">
 
@@ -301,6 +349,20 @@ const Checkout = () => {
       {isEditing ? "Save" : "Edit"}
     </button>
   </div>
+  <div className="location-box">
+  <button
+    type="button"
+    className="location-btn"
+    onClick={findMyLocation}
+    disabled={locationLoading}
+  >
+    {locationLoading ? "Detecting..." : "📍 Find My Location"}
+  </button>
+
+  {locationStatus && (
+    <p className="location-status">{locationStatus}</p>
+  )}
+</div>
 
   <div className="form-grid">
 
