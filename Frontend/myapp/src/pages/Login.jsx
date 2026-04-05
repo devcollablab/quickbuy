@@ -2,14 +2,14 @@ import React, { useState,useEffect } from "react";
 import customAxios from "../components/customAxios";
 import { urlLogin } from "../../endpoints";
 import { useAuth } from "../context/AuthContext";
-import CustomAlert from "../components/CustomAlert";
+import Toast from "../components/Toast";
 
 
 const Login = ({ isOpen, setIsOpen, onOpenSignup, onOpenForgot }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [alert, setAlert] = useState({ message: "", type: "success" });
+  const [toast, setToast] = useState({ message: "", type: "success" });
 
   const { login } = useAuth();
 
@@ -42,9 +42,9 @@ const Login = ({ isOpen, setIsOpen, onOpenSignup, onOpenForgot }) => {
         password: password,
       });
 
-      setAlert({
-        message: "Login Successful",
-        type: "success",
+      setToast({
+        message: "Login Successsful",
+        type: "success"
       });
 
       setTimeout(() => {
@@ -84,10 +84,10 @@ const Login = ({ isOpen, setIsOpen, onOpenSignup, onOpenForgot }) => {
 
   return (
     <>
-    <CustomAlert
-      message={alert.message}
-      type={alert.type}
-      onClose={() => setAlert({ message: "" })}
+    <Toast
+     message={toast.message}
+     type={toast.type}
+     onClose={() => setToast({ message: "" })}
     />
     {isOpen && (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-3 sm:p-4">

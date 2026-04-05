@@ -38,14 +38,14 @@ const Footer = () => {
             </ul>
           </div>
 
-          <div className="footer-section newsletter-section">
+          {/* <div className="footer-section newsletter-section">
             <h3>Newsletter</h3>
             <p>Subscribe to receive updates, access to exclusive deals, and more.</p>
             <form className="newsletter-form" onSubmit={(e) => e.preventDefault()}>
               <input type="email" placeholder="Enter your email address" required />
               <button type="submit" className="btn btn-accent">Subscribe</button>
             </form>
-          </div>
+          </div> */}
         </div>
         
         <div className="footer-bottom">

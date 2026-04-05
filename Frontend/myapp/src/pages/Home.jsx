@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import { Link,useNavigate} from 'react-router-dom';
+import { ChevronRight,Loader } from 'lucide-react';
 
 import '../styles/Home.css';
 import { urlGetProducts } from '../../endpoints';
 import customAxios from '../components/customAxios';
+import { urlAddToCart } from '../../endpoints';
+import Toast from "../components/Toast";
+
+import womenImg from "../assets/wmn.jpg";
+import menImg from "../assets/menn.jpeg";
+import unisexImg from "../assets/unisexx.jpeg";
+import luxuryImg from "../assets/exclusive.jpeg";
+
 
 const heroSlides = [
   {
@@ -31,10 +39,10 @@ const heroSlides = [
 ];
 
 const categories = [
-  { name: 'Women', image: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&q=80&w=800' },
-  { name: 'Men', image: 'https://images.unsplash.com/photo-1595425970377-c9703bc48b2a?auto=format&fit=crop&q=80&w=800' },
-  { name: 'Unisex', image: 'https://images.unsplash.com/photo-1588691888463-b67fcfcb7fb0?auto=format&fit=crop&q=80&w=800' },
-  { name: 'Luxury Collection', image: 'https://images.unsplash.com/photo-1582211594533-268fec19385b?auto=format&fit=crop&q=80&w=800' }
+  { name: 'Women', image: womenImg },
+  { name: 'Men', image: menImg },
+  { name: 'Unisex', image: unisexImg },
+  { name: 'Luxury Collection', image: luxuryImg }
 ];
 
 const Home = () => {
@@ -42,6 +50,9 @@ const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const [addingId, setAddingId] = useState(null);
+  const [toast, setToast] = useState({ message: "", type: "success" });
 
   // Hero auto slider
   useEffect(() => {
@@ -58,7 +69,7 @@ const Home = () => {
   useEffect(() => {
 
     const fetchProducts = async () => {
-      debugger;
+      
       try {
 
         const response = await customAxios.get(urlGetProducts);
@@ -78,13 +89,48 @@ const Home = () => {
 
   }, []);
 
+  const handleAddToCart = async (productId) => {
+    try {
+      setAddingId(productId);
+  
+      await customAxios.post(urlAddToCart, {
+        product_id: productId,
+        quantity: 1,
+      });
+  
+      alert("✅ Item added to cart");
+      navigate("/cart");
+  
+    } catch (err) {
+      console.error("Add to cart failed", err);
+  
+      if (err.response?.status === 401) {
+        setToast({
+          message: "Please Login First",
+          type: "error"
+        });
+      } else {
+        alert("Failed to add to cart");
+      }
+    } finally {
+      setAddingId(null);
+    }
+  };
+
   // Featured products
   const featuredProducts = products
     .slice(0, 8);
 
   return (
+    <>
+    <Toast
+     message={toast.message}
+     type={toast.type}
+     onClose={() => setToast({ message: "" })}
+    />
+    
     <div className="home-page">
-
+      
       {/* Hero Slider */}
       <section className="hero-slider">
         {heroSlides.map((slide, index) => (
@@ -126,7 +172,10 @@ const Home = () => {
 
         <div className="product-grid">
 
-          {loading && <p>Loading products...</p>}
+          {loading && (<div className="flex flex-col items-center justify-center py-16">
+             <Loader className="animate-spin text-blue-600 mb-4" size={32} />
+             <p className="text-gray-600 font-medium">Loading products...</p>
+           </div>)}
 
           {!loading && featuredProducts.map((product) => (
 
@@ -144,9 +193,12 @@ const Home = () => {
 
                 {product.isNew && <span className="badge new">New</span>}
 
-                <button className="add-to-cart-quick">
-                  Add to Cart
-                </button>
+                <button
+  className="add-to-cart-quick"
+  onClick={() => handleAddToCart(product.id)}
+>
+  {addingId === product.id ? "Adding..." : "Add to Cart"}
+</button>
 
               </div>
 
@@ -228,6 +280,7 @@ const Home = () => {
       </section>
 
     </div>
+    </>
   );
 };
 

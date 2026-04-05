@@ -336,6 +336,22 @@
     gap: 3rem;
   }
 }
+@media (max-width: 576px) {
+
+  .product-details-page {
+    padding-top: 4.5rem;
+  }
+
+  .main-image-container {
+    max-width: 280px;
+    margin: 0 auto;
+    aspect-ratio: 1/1;
+  }
+
+  .product-gallery {
+    gap: 0.5rem;
+  }
+}
 
 @media (max-width: 576px) {
   .desktop-only {
@@ -359,4 +375,21 @@
     justify-content: center;
     text-align: center;
   }
+}
+
+@media (max-width: 576px) {
+
+  .quantity-selector {
+    transform: scale(0.9);
+  }
+
+  .sticky-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .add-to-cart-btn-full {
+    width: 100%;
+  }
+
 }

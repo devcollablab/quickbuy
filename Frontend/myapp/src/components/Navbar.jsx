@@ -4,6 +4,7 @@ import { ShoppingBag, Search, User, Menu, X, ChevronDown } from 'lucide-react';
 import '../styles/Navbar.css';
 import { urlGetProducts } from '../../endpoints';
 import customAxios from './customAxios';
+import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -15,6 +16,7 @@ const Navbar = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { user } = useAuth();
 
   // Fetch products from backend
 useEffect(() => {
@@ -124,9 +126,10 @@ useEffect(() => {
           >
             <Search size={22} />
           </button>
-          <Link to="/profile" className="icon-btn" aria-label="Profile">
-            <User size={22} />
-          </Link>
+          <Link to="/profile" className="icon-btn profile-icon" aria-label="Profile">
+  <User size={22} />
+  {!user && <span className="login-tag">Login</span>}
+</Link>
           <Link to="/cart" className="icon-btn cart-btn" aria-label="Cart">
             <ShoppingBag size={22} />
             <span className="cart-badge">{}</span>

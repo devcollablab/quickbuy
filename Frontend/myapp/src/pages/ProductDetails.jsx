@@ -3,9 +3,10 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ShopContext } from '../context/ShopContext';
 import { Minus, Plus, ChevronRight, Star } from 'lucide-react';
 import '../styles/ProductDetails.css';
-
+import Toast from "../components/Toast";
 import { urlGetProductById, urlAddToCart, urlGetProductimages } from '../../endpoints';
 import customAxios from '../components/customAxios';
+import Loading from "../components/Loading";
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -19,7 +20,7 @@ const ProductDetails = () => {
   const [loading, setLoading] = useState(true);
 const [error, setError] = useState(null);
 const [adding, setAdding] = useState(false);
-
+const [toast, setToast] = useState({ message: "", type: "success" });
 
 useEffect(() => {
   const fetchProduct = async () => {
@@ -33,7 +34,10 @@ useEffect(() => {
 
     } catch (err) {
       console.error("Error fetching product", err);
-      setError("Failed to load product details");
+      setToast({
+        message: "Failed to Load Products",
+        type: "error"
+      });
     } finally {
       setLoading(false);
     }
@@ -43,9 +47,9 @@ useEffect(() => {
 }, [id]);
 
 
-if (loading) return <div className="loading">Loading...</div>;
+if (loading) return <Loading text="Loading product..." />;
 
-if (error) return <div className="loading">{error}</div>;
+if (error) return <Loading text={error} />;
 
 if (!product) return <div className="loading">Product not found</div>;
 
@@ -61,7 +65,7 @@ if (!product) return <div className="loading">Product not found</div>;
   //   .slice(0, 4);
 
   const handleAddToCart = async () => {
-    debugger;
+    
     try {
       setAdding(true);
   
@@ -70,13 +74,19 @@ if (!product) return <div className="loading">Product not found</div>;
         quantity: 1,
       });
   
-      alert("✅ Item added to cart");
+      setToast({
+        message: "Item added to Cart",
+        type: "success"
+      });
       navigate("/cart");
     } catch (err) {
       console.error("Add to cart failed", err);
   
       if (err.response?.status === 401) {
-        alert("Please login first");
+        setToast({
+          message: "Please Login First",
+          type: "error"
+        });
       } else {
         alert("Failed to add to cart");
       }
@@ -87,6 +97,11 @@ if (!product) return <div className="loading">Product not found</div>;
 
   return (
     <div className="product-details-page">
+      <Toast
+     message={toast.message}
+     type={toast.type}
+     onClose={() => setToast({ message: "" })}
+    />
       {/* Breadcrumbs */}
       <div className="breadcrumbs container">
         <Link to="/">Home</Link> <ChevronRight size={14} /> 
@@ -119,19 +134,20 @@ if (!product) return <div className="loading">Product not found</div>;
           <p className="product-category-label">{product.category}</p>
           <h1 className="product-title">{product.name}</h1>
           
+          
           <div className="product-rating">
-            <div className="stars">
-              {[...Array(5)].map((_, i) => (
-                <Star 
-                  key={i} 
-                  size={16} 
-                  fill={i < Math.floor(product.rating) ? 'var(--color-accent)' : 'none'} 
-                  color={i < Math.floor(product.rating) ? 'var(--color-accent)' : '#ccc'}
-                />
-              ))}
-            </div>
-            <span>{product.rating} ({Math.floor(Math.random() * 50) + 10} reviews)</span>
-          </div>
+  <div className="stars">
+    {[...Array(5)].map((_, i) => (
+      <Star
+        key={i}
+        size={16}
+        fill={i < 4 ? 'var(--color-accent)' : 'none'}
+        color={i < 4 ? 'var(--color-accent)' : '#ccc'}
+      />
+    ))}
+  </div>
+  <span>4.0 (1k reviews)</span>
+</div>
 
           <p className="product-price-large">${product.price.toFixed(2)}</p>
           
@@ -142,15 +158,21 @@ if (!product) return <div className="loading">Product not found</div>;
 
           <div className="cart-actions-sticky">
             <div className="container sticky-container">
-              <div className="quantity-selector desktop-only">
+              <div className="quantity-selector ">
                 <button onClick={() => setQuantity(q => Math.max(1, q - 1))}><Minus size={16} /></button>
                 <input type="number" value={quantity} readOnly />
                 <button onClick={() => setQuantity(q => q + 1)}><Plus size={16} /></button>
               </div>
               
-              <button className="btn btn-text add-to-cart-btn-full animate-slide-up delay-200" onClick={handleAddToCart}>
-                ADD TO CART <span className="separator">-</span> ${ (product.price * quantity).toFixed(2) }
-              </button>
+              <button
+  className="btn btn-text add-to-cart-btn-full animate-slide-up delay-200"
+  onClick={handleAddToCart}
+  disabled={adding}
+>
+  {adding ? "ADDING..." : "ADD TO CART"}
+  <span className="separator">-</span>
+  ${ (product.price * quantity).toFixed(2) }
+</button>
             </div>
           </div>
 

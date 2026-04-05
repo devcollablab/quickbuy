@@ -11,7 +11,7 @@ const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
 
   const fetchCart = async () => {
-    debugger;
+    
     try {
       const res = await customAxios.get(urlGetCart);
       setCartItems(res.data.items || []);
