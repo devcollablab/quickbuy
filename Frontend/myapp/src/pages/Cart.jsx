@@ -51,6 +51,7 @@ const Cart = () => {
         <h2>Your Cart is Empty</h2>
         <p>Looks like you haven't added any premium fragrances to your cart yet.</p>
         <Link to="/shop" className="btn btn-accent empty-cart-btn">Discover Our Collection</Link>
+        <Link to="/profile" className="btn btn-accent empty-cart-btn">Please login</Link>
       </div>
     );
   }

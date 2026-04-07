@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ShopContext } from '../context/ShopContext';
+
 import { Minus, Plus, ChevronRight, Star } from 'lucide-react';
 import '../styles/ProductDetails.css';
 import Toast from "../components/Toast";
@@ -12,7 +12,7 @@ const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   
-  //const { products, addToCart } = useContext(ShopContext);
+  
   
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
