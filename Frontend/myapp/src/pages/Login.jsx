@@ -1,8 +1,9 @@
 import React, { useState,useEffect } from "react";
 import customAxios from "../components/customAxios";
-import { urlLogin } from "../../endpoints";
+import { urlGoogleLogin, urlLogin } from "../../endpoints";
 import { useAuth } from "../context/AuthContext";
 import Toast from "../components/Toast";
+import { GoogleLogin } from "@react-oauth/google";
 
 
 const Login = ({ isOpen, setIsOpen, onOpenSignup, onOpenForgot }) => {
@@ -32,7 +33,11 @@ const Login = ({ isOpen, setIsOpen, onOpenSignup, onOpenForgot }) => {
     e.preventDefault();
 
     if (!username || !password) {
-      alert("Please enter email and password");
+      
+      setToast({
+        message: "Please enter email and password",
+        type: "error"
+      });
       return;
     }
 
@@ -66,9 +71,12 @@ const Login = ({ isOpen, setIsOpen, onOpenSignup, onOpenForgot }) => {
       console.error("Login failed:", error);
 
       const message =
-        error.response?.data?.detail || "Invalid email or password";
+        error.response?.data?.detail;
 
-      alert(message);
+        setToast({
+          message: "Invalid email or password",
+          type: "error"
+        });
     }
   };
 
@@ -80,133 +88,193 @@ const Login = ({ isOpen, setIsOpen, onOpenSignup, onOpenForgot }) => {
     resetFields();
   };
 
+  const handleGoogleLogin = async (credentialResponse) => {
+    try {
+      const id_token = credentialResponse.credential;
+  
+      const response = await customAxios.post(urlGoogleLogin, {
+        id_token: id_token,
+      });
+  
+      // store tokens
+      localStorage.setItem("access_token", response.data.access_token);
+      localStorage.setItem("refresh_token", response.data.refresh_token);
+  
+      login(response.data.access_token);
+  
+      setToast({
+        message: "Google Login Successful",
+        type: "success",
+      });
+  
+      setTimeout(() => {
+        setIsOpen(false);
+      }, 1500);
+  
+    } catch (error) {
+      console.error("Google login failed:", error);
+  
+      setToast({
+        message: "Google login failed",
+        type: "error",
+      });
+    }
+  };
   
 
   return (
     <>
-    <Toast
-     message={toast.message}
-     type={toast.type}
-     onClose={() => setToast({ message: "" })}
-    />
-    {isOpen && (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-3 sm:p-4">
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast({ message: "" })}
+      />
   
-      <div className="bg-[#f7f5f2] w-full max-w-md sm:max-w-lg p-6 sm:p-10 shadow-xl relative rounded-sm">
+      {isOpen && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-2">
   
-        {/* Close Button */}
-        <button
-          onClick={closeModal}
-          className="absolute top-3 right-3 text-gray-500 text-lg sm:text-xl"
-        >
-          ✕
-        </button>
+          {/* Smaller Modal */}
+          <div className="bg-[#f7f5f2]/95 backdrop-blur-md w-full max-w-xs sm:max-w-sm p-3 sm:p-4 
+rounded-2xl shadow-xl relative border border-white/40">
   
-        {/* Brand */}
-        <h1 className="text-center text-2xl sm:text-3xl tracking-[4px] sm:tracking-[6px] mb-8 sm:mb-10 font-serif">
-          LUXE<span className="text-[#c5a46d]">SCENTS</span>
-        </h1>
+            {/* Close Button */}
+            <button
+              onClick={closeModal}
+              className="absolute top-2 right-2 cursor-pointer text-gray-500 text-base"
+            >
+              ✕
+            </button>
   
-        {/* Tabs */}
-        <div className="flex justify-center mb-8 sm:mb-10 border-b text-sm sm:text-base">
+            {/* Brand */}
+            <h1 className="text-center text-lg sm:text-xl tracking-[3px] mb-4 font-serif">
+              LUXE<span className="text-[#c5a46d]">SCENTS</span>
+            </h1>
   
-          <button className="text-[#c5a46d] tracking-widest pb-3 border-b-2 border-[#c5a46d] px-6 sm:px-10">
-            LOGIN
-          </button>
+            {/* Tabs */}
+            <div className="flex justify-center mb-4 border-b text-xs">
   
-          <button
-            onClick={() => {
-              setIsOpen(false);
-              resetFields();
-              onOpenSignup();
-            }}
-            className="text-gray-500 tracking-widest pb-3 px-6 sm:px-10"
-          >
-            REGISTER
-          </button>
-  
-        </div>
-  
-        {/* Form */}
-        <form onSubmit={handleLogin}>
-  
-          {/* Email */}
-          <div className="mb-5 sm:mb-6">
-  
-            <label className="block text-gray-500 tracking-widest text-xs sm:text-sm mb-2">
-              EMAIL
-            </label>
-  
-            <input
-              type="email"
-              required
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="you@example.com"
-              className="w-full border border-gray-300 px-3 sm:px-4 py-2.5 sm:py-3 bg-white focus:outline-none focus:border-[#c5a46d]"
-            />
-  
-          </div>
-  
-          {/* Password */}
-          <div className="mb-5 sm:mb-6">
-  
-            <label className="block text-gray-500 tracking-widest text-xs sm:text-sm mb-2">
-              PASSWORD
-            </label>
-  
-            <div className="relative">
-  
-              <input
-                type={showPassword ? "text" : "password"}
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-gray-300 px-3 sm:px-4 py-2.5 sm:py-3 bg-white focus:outline-none focus:border-[#c5a46d]"
-              />
+              <button className="text-[#c5a46d] tracking-widest pb-2 border-b-2 border-[#c5a46d] px-4">
+                LOGIN
+              </button>
   
               <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-2.5 sm:top-3 text-xs sm:text-sm text-gray-500"
+                onClick={() => {
+                  setIsOpen(false);
+                  resetFields();
+                  onOpenSignup();
+                }}
+                className="text-gray-500 tracking-widest pb-2 px-4"
               >
-                {showPassword ? "Hide" : "Show"}
+                REGISTER
               </button>
   
             </div>
   
+            {/* Form */}
+            <form onSubmit={handleLogin}>
+  
+              {/* Email */}
+              <div className="mb-3">
+                <label className="block text-gray-500 text-xs mb-1">
+                  EMAIL
+                </label>
+  
+                <input
+                  type="email"
+                  required
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full border border-gray-300 px-3 py-2 text-sm bg-white 
+rounded-lg focus:outline-none focus:border-[#c5a46d] focus:ring-1 focus:ring-[#c5a46d]"
+                />
+              </div>
+  
+              {/* Password */}
+              <div className="mb-3">
+                <label className="block text-gray-500 text-xs mb-1">
+                  PASSWORD
+                </label>
+  
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full border border-gray-300 px-3 py-2 text-sm bg-white 
+rounded-lg focus:outline-none focus:border-[#c5a46d] focus:ring-1 focus:ring-[#c5a46d]"
+                  />
+  
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500"
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
+              </div>
+  
+              {/* Links */}
+              <div className="text-right mb-3 space-y-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOpen(false);
+                    resetFields();
+                    onOpenForgot();
+                  }}
+                  className="text-[#c5a46d] text-xs underline"
+                >
+                  Forgot password?
+                </button>
+  
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOpen(false);
+                    resetFields();
+                    onOpenSignup();
+                  }}
+                  className="block text-xs text-gray-500 underline"
+                >
+                  New User REGISTER Here..!
+                </button>
+              </div>
+  
+              {/* Login Button */}
+              <button
+                type="submit"
+                className="w-full bg-[#c5a46d] text-white tracking-widest py-2 text-sm 
+rounded-lg hover:opacity-90 hover:shadow-md transition-all duration-200"
+              >
+                LOGIN
+              </button>
+  
+              {/* Google Login */}
+              <div className="mt-4">
+                <div className="text-center text-gray-400 text-[10px] mb-2">
+                  OR
+                </div>
+  
+                <div className="flex justify-center scale-90">
+                  <GoogleLogin
+                    onSuccess={handleGoogleLogin}
+                    onError={() => {
+                      setToast({
+                        message: "Google login failed",
+                        type: "error",
+                      });
+                    }}
+                  />
+                </div>
+              </div>
+  
+            </form>
           </div>
-  
-          {/* Forgot Password */}
-          <div className="text-right mb-5 sm:mb-6">
-  
-            <button
-              type="button"
-              onClick={() => {
-                setIsOpen(false);
-                resetFields();
-                onOpenForgot();
-              }}
-              className="text-[#c5a46d] text-xs sm:text-sm underline"
-            >
-              Forgot password?
-            </button>
-  
-          </div>
-  
-          {/* Login Button */}
-          <button
-            type="submit"
-            className="w-full bg-[#c5a46d] text-white tracking-widest py-2.5 sm:py-3 text-sm sm:text-base hover:opacity-90 transition"
-          >
-            LOGIN
-          </button>
-  
-        </form>
-  
-      </div>
-    </div>
-    )}
+        </div>
+      )}
     </>
   );
 };

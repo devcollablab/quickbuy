@@ -71,7 +71,7 @@ if (!product) return <div className="loading">Product not found</div>;
   
       await customAxios.post(urlAddToCart, {
         product_id: product.id,
-        quantity: 1,
+        quantity: quantity,
       });
   
       setToast({

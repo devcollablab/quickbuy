@@ -1,8 +1,16 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 const Toast = ({ message, type = "success", onClose }) => {
+  const [show, setShow] = useState(false);
+
   useEffect(() => {
-    const timer = setTimeout(onClose, 3000);
+    setShow(true);
+
+    const timer = setTimeout(() => {
+      setShow(false);
+      setTimeout(onClose, 300); // wait for animation to finish
+    }, 3000);
+
     return () => clearTimeout(timer);
   }, [onClose]);
 
@@ -15,10 +23,16 @@ const Toast = ({ message, type = "success", onClose }) => {
   if (!message) return null;
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100]">
-      <div className={`${colors[type]} text-white px-6 py-3 shadow-lg flex items-center gap-3`}>
+    <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[100]">
+      <div
+        className={`
+          ${colors[type]} text-white px-6 py-3 shadow-lg flex items-center gap-3 rounded-md
+          transform transition-all duration-300 ease-out
+          ${show ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-10"}
+        `}
+      >
         <span className="text-sm tracking-wide">{message}</span>
-        <button onClick={onClose}>✕</button>
+        <button onClick={() => setShow(false)}>✕</button>
       </div>
     </div>
   );
