@@ -139,7 +139,7 @@ const [loadingAvatars, setLoadingAvatars] = useState(false);
 
   // UPDATE PROFILE
   const saveProfile = async () => {
-
+      debugger;
     const nameRegex = /^[A-Za-z\s]+$/;
     const phoneRegex = /^[0-9]{10}$/;
     const pincodeRegex = /^[0-9]{6}$/;
@@ -171,7 +171,10 @@ const [loadingAvatars, setLoadingAvatars] = useState(false);
       });
     } catch (err) {
       console.error(err);
-      alert("Failed to update profile");
+      setToast({
+        message: "Failed to update profile",
+        type: "error"
+      });
     }
   };
 
@@ -304,8 +307,7 @@ const [loadingAvatars, setLoadingAvatars] = useState(false);
   <div className="relative inline-block">
     <img
       src={
-        userInfo.profile_image_url ||
-        "https://i.pravatar.cc/150"
+        userInfo.profile_image_url
       }
       className="w-20 h-20 rounded-full mx-auto mb-2 object-cover"
       alt="profile"
@@ -408,11 +410,15 @@ ${
                   </h2>
 
                   <button
-                    onClick={toggleEdit}
-                    className="border px-4 py-1.5 rounded text-sm hover:bg-gray-50"
-                  >
-                    {editMode ? "Save Profile" : "Edit Profile"}
-                  </button>
+  onClick={toggleEdit}
+  className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 
+  ${editMode 
+    ? "bg-green-600 text-white hover:bg-green-700 shadow-md" 
+    : "bg-blue-600 text-white hover:bg-blue-700 shadow-md"}
+  active:scale-95`}
+>
+  {editMode ? "Save Profile" : "Edit Profile"}
+</button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

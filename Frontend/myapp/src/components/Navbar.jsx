@@ -126,14 +126,16 @@ useEffect(() => {
           >
             <Search size={22} />
           </button>
-          <Link to="/profile" className="icon-btn profile-icon" aria-label="Profile">
-  <User size={22} />
-  {!user && <span className="login-tag">Login</span>}
-</Link>
           <Link to="/cart" className="icon-btn cart-btn" aria-label="Cart">
             <ShoppingBag size={22} />
             <span className="cart-badge">{}</span>
           </Link>
+          
+          <Link to="/profile" className="icon-btn profile-icon" aria-label="Profile">
+  <User size={22} />
+  {!user && <span className="login-tag">Login</span>}
+</Link>
+          
         </div>
       </div>
 

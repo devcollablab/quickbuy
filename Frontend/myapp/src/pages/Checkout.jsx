@@ -4,6 +4,7 @@ import { ChevronRight, CheckCircle } from "lucide-react";
 import customAxios from "../components/customAxios";
 import { urlCreateOrder, urlGetCart, urlGetProfile, urlUpdateProfile, urlVerifyPayment } from "../../endpoints";
 import "../styles/Checkout.css";
+import Toast from "../components/Toast";
 
 const Checkout = () => {
 
@@ -16,6 +17,7 @@ const Checkout = () => {
 
   const [locationLoading, setLocationLoading] = useState(false);
 const [locationStatus, setLocationStatus] = useState("");
+const [toast, setToast] = useState({ message: "", type: "success" });
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -73,6 +75,7 @@ const [locationStatus, setLocationStatus] = useState("");
   );
 
   const loadRazorpay = () => {
+    debugger;
     return new Promise((resolve) => {
       const script = document.createElement("script");
       script.src = "https://checkout.razorpay.com/v1/checkout.js";
@@ -86,12 +89,19 @@ const [locationStatus, setLocationStatus] = useState("");
     const loaded = await loadRazorpay();
   
     if (!loaded) {
-      alert("Razorpay SDK failed to load");
+      setToast({
+        message: "Razorpay SDK failed to load",
+        type: "error"
+      });
       return;
     }
   
     if (!window.Razorpay) {
-      alert("Razorpay not available");
+      
+      setToast({
+        message: "Razorpay not available",
+        type: "alert"
+      });
       return;
     }
   
@@ -124,7 +134,11 @@ const [locationStatus, setLocationStatus] = useState("");
             razorpay_signature: response.razorpay_signature
           });
   
-          alert("Payment Success! Order ID: " + verifyRes.data.order_id);
+          alert("Order ID: " + verifyRes.data.order_id);
+          setToast({
+            message: "Payment Success!",
+            type: "success"
+          });
           navigate("/profile", { state: { section: "orders" } });
 
   
@@ -139,7 +153,11 @@ const [locationStatus, setLocationStatus] = useState("");
   
       rzp.on("payment.failed", function (response) {
         console.error(response.error);
-        alert("Payment Failed");
+        
+        setToast({
+          message: "Payment Failed",
+          type: "error"
+        });
       });
   
       rzp.open();
@@ -238,17 +256,27 @@ const [locationStatus, setLocationStatus] = useState("");
       const pincodeRegex = /^[0-9]{6}$/;
   
       if (!nameRegex.test(formData.firstName)) {
-        alert("Name should contain only letters");
+        setToast({
+          message: "Name should contain only letters",
+          type: "error"
+        });
         return;
       }
   
       if (!phoneRegex.test(formData.phone)) {
-        alert("Phone must be 10 digits");
+        setToast({
+          message: "Phone must be 10 digits",
+          type: "error"
+        });
         return;
       }
   
       if (!pincodeRegex.test(formData.pincode)) {
-        alert("Pincode must be 6 digits");
+        setToast({
+          message: "Pincode must be 6 digits",
+          type: "error"
+        });
+
         return;
       }
   
@@ -264,10 +292,18 @@ const [locationStatus, setLocationStatus] = useState("");
           pincode: formData.pincode
         });
   
-        alert("Profile updated successfully");
+        
+        setToast({
+          message: "Profile updated successfully",
+          type: "success"
+        });
       } catch (err) {
         console.error(err);
-        alert("Failed to update profile");
+        
+        setToast({
+          message: "Failed to update profile",
+          type: "error"
+        });
         return; // stop toggle if failed
       }
     }
@@ -308,6 +344,10 @@ const [locationStatus, setLocationStatus] = useState("");
   
           setIsEditing(true); // enable editing after fetch
           setLocationStatus("Location fetched successfully");
+          setToast({
+            message: "📍 We Found Your Address — Edit if Needed",
+            type: "warning"
+          });
         } catch (error) {
           setLocationStatus("Failed to fetch address");
         }
@@ -322,6 +362,12 @@ const [locationStatus, setLocationStatus] = useState("");
   };
 
   return (
+    <>
+    <Toast
+     message={toast.message}
+     type={toast.type}
+     onClose={() => setToast({ message: "" })}
+    />
     <div className="checkout-page container">
 
       <div className="breadcrumbs">
@@ -559,6 +605,7 @@ const [locationStatus, setLocationStatus] = useState("");
 
       </div>
     </div>
+    </>
   );
 };
 

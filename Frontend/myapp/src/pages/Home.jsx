@@ -71,8 +71,9 @@ const Home = () => {
     const fetchProducts = async () => {
       
       try {
-
-        const response = await customAxios.get(urlGetProducts);
+        const response = await customAxios.get(urlGetProducts, {
+          withCredentials: true
+        });
 
         if (response.status === 200 && response.data) {
           setProducts(response.data);
@@ -97,8 +98,11 @@ const Home = () => {
         product_id: productId,
         quantity: 1,
       });
-  
-      alert("✅ Item added to cart");
+      
+      setToast({
+        message: "✅ Item added to cart",
+        type: "success"
+      });
       navigate("/cart");
   
     } catch (err) {
@@ -110,7 +114,11 @@ const Home = () => {
           type: "error"
         });
       } else {
-        alert("Failed to add to cart");
+        setToast({
+          message: "Failed to add to cart",
+          type: "error"
+        });
+        
       }
     } finally {
       setAddingId(null);
