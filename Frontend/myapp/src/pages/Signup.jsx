@@ -121,7 +121,11 @@ const Signup = ({ isOpen, setIsOpen, onOpenLogin }) => {
 
       closeModal();
     } catch (error) {
-      alert(error.response?.data?.message || "OTP verification failed");
+      //alert(error.response?.data?.message || "OTP verification failed");
+      setToast({
+        message: "OTP verification failed",
+        type: "error",
+      });
     }
   };
 

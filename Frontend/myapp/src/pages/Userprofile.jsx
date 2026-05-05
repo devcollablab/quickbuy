@@ -117,7 +117,15 @@ const [loadingAvatars, setLoadingAvatars] = useState(false);
   const fetchProfile = async () => {
     try {
       const res = await customAxios.get(urlGetProfile);
-      setUserInfo(res.data);
+  
+      let data = res.data;
+  
+      if (data.phone_number?.startsWith("+91")) {
+        data.phone_number = data.phone_number.replace("+91", "");
+      }
+  
+      setUserInfo(data);
+  
     } catch (err) {
       if (err.response?.status === 404) {
         await createProfile();
@@ -129,6 +137,7 @@ const [loadingAvatars, setLoadingAvatars] = useState(false);
 
   // CREATE PROFILE
   const createProfile = async () => {
+    debugger;
     try {
       const res = await customAxios.post(urlCreateProfile, userInfo);
       setUserInfo(res.data);
@@ -139,42 +148,61 @@ const [loadingAvatars, setLoadingAvatars] = useState(false);
 
   // UPDATE PROFILE
   const saveProfile = async () => {
-      debugger;
-    const nameRegex = /^[A-Za-z\s]+$/;
-    const phoneRegex = /^[0-9]{10}$/;
-    const pincodeRegex = /^[0-9]{6}$/;
-  
-    // if (!nameRegex.test(userInfo.full_name)) {
-    //   alert("Full name should contain only letters");
-    //   return;
-    // }
-  
-    // if (!phoneRegex.test(userInfo.phone_number)) {
-    //   setToast({
-    //     message: "10 digits number",
-    //     type: "error",
-    //   });
-    //   return;
-    // }
-  
-    // if (!pincodeRegex.test(userInfo.pincode)) {
-    //   alert("Pincode must be 6 digits");
-    //   return;
-    // }
-  
     try {
-      const res = await customAxios.put(urlUpdateProfile, userInfo);
-      setUserInfo(res.data);
+      const cleanedData = Object.fromEntries(
+        Object.entries(userInfo).filter(([_, v]) => v !== "" && v !== null)
+      );
+  
+      // 👉 Add +91 before sending
+      // if (cleanedData.phone_number) {
+      //   cleanedData.phone_number = "+91" + cleanedData.phone_number;
+      // }
+  
+      const res = await customAxios.put(urlUpdateProfile, cleanedData);
+  
+      // 👉 Strip again after response
+      let data = res.data;
+      if (data.phone_number?.startsWith("+91")) {
+        data.phone_number = data.phone_number.replace("+91", "");
+      }
+  
+      setUserInfo(data);
+  
       setToast({
         message: "Profile Updated",
-        type: "success"
+        type: "success",
       });
+  
     } catch (err) {
-      console.error(err);
-      setToast({
-        message: "Failed to update profile",
-        type: "error"
-      });
+      console.error("Update failed:", err.response?.data);
+  
+      // ✅ fallback to create
+      if (err.response?.status === 404) {
+        try {
+          const res = await customAxios.post(urlCreateProfile, userInfo);
+  
+          setUserInfo(res.data);
+  
+          setToast({
+            message: "Profile Created",
+            type: "success",
+          });
+  
+        } catch (createErr) {
+          console.error("Create failed:", createErr.response?.data);
+  
+          setToast({
+            message: "Phone number is required",
+            type: "warning",
+          });
+          
+        }
+      } else {
+        setToast({
+          message: err.response?.data?.detail || "Update failed",
+          type: "error",
+        });
+      }
     }
   };
 
