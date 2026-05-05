@@ -393,3 +393,43 @@
   }
 
 }
+
+.variant-section {
+  margin-bottom: 1.5rem;
+}
+
+.variant-title {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-light);
+}
+
+.variant-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 0.5rem;
+}
+
+.variant-btn {
+  padding: 6px 14px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.variant-btn:hover {
+  border-color: var(--color-accent);
+}
+
+.variant-btn.active {
+  background: var(--color-accent);
+  color: #fff;
+  border-color: var(--color-accent);
+}
+
+.stock-text {
+  font-size: 0.8rem;
+  color: #888;
+}

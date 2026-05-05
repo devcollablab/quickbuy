@@ -21,15 +21,20 @@ const ProductDetails = () => {
 const [error, setError] = useState(null);
 const [adding, setAdding] = useState(false);
 const [toast, setToast] = useState({ message: "", type: "success" });
+const [selectedVariant, setSelectedVariant] = useState(null);
 
 useEffect(() => {
   const fetchProduct = async () => {
+    debugger;
     try {
       setLoading(true);
 
-      const response = await customAxios.get(urlGetProductimages(id));
+      const response = await customAxios.get(urlGetProductById(id));
 
       setProduct(response.data);
+      if (response.data.variants?.length > 0) {
+        setSelectedVariant(response.data.variants[0]); // default select first
+      }
       window.scrollTo(0,0);
 
     } catch (err) {
@@ -57,7 +62,7 @@ if (!product) return <div className="loading">Product not found</div>;
   const galleryImages = product.images
   ? product.images
       .sort((a, b) => a.position - b.position)
-      .map(img => img.url)
+      .map(img => img)
   : [];
 
   // const relatedProducts = product
@@ -65,20 +70,29 @@ if (!product) return <div className="loading">Product not found</div>;
   //   .slice(0, 4);
 
   const handleAddToCart = async () => {
-    
+    debugger;
     try {
       setAdding(true);
   
-      await customAxios.post(urlAddToCart, {
+      const payload = {
         product_id: product.id,
         quantity: quantity,
-      });
+      };
+  
+      // ✅ Add variant_id if variant exists
+      if (selectedVariant) {
+        payload.variant_id = selectedVariant.id;
+      }
+  
+      await customAxios.post(urlAddToCart, payload);
   
       setToast({
         message: "Item added to Cart",
         type: "success"
       });
+  
       navigate("/cart");
+  
     } catch (err) {
       console.error("Add to cart failed", err);
   
@@ -88,12 +102,27 @@ if (!product) return <div className="loading">Product not found</div>;
           type: "error"
         });
       } else {
-        alert("Failed to add to cart");
+        setToast({
+          message: err.response?.data?.detail || "Failed to add to cart",
+          type: "error"
+        });
       }
     } finally {
       setAdding(false);
     }
   };
+
+  // if (product.variants?.length > 0 && !selectedVariant) {
+  //   setToast({
+  //     message: "Please select a size",
+  //     type: "error"
+  //   });
+  //   return;
+  // }
+
+  const isOutOfStock = selectedVariant
+    ? selectedVariant.stock <= 0
+    : product.stock <= 0;
 
   return (
     <div className="product-details-page">
@@ -127,6 +156,29 @@ if (!product) return <div className="loading">Product not found</div>;
               </div>
             ))}
           </div>
+          {product.variants?.length > 0 && (
+  <div className="variant-section">
+    <p className="variant-title">Select Size</p>
+
+    <div className="variant-buttons">
+      {product.variants.map((variant, index) => (
+        <button
+          key={index}
+          className={`variant-btn ${
+            selectedVariant?.size_ml === variant.size_ml ? "active" : ""
+          }`}
+          onClick={() => setSelectedVariant(variant)}
+        >
+          {variant.size_ml} ml
+        </button>
+      ))}
+    </div>
+
+    <p className="stock-text">
+      Stock: {selectedVariant?.stock}
+    </p>
+  </div>
+)}
         </div>
 
         {/* Product Info */}
@@ -149,7 +201,7 @@ if (!product) return <div className="loading">Product not found</div>;
   <span>4.0 (1k reviews)</span>
 </div>
 
-          <p className="product-price-large">${product.price.toFixed(2)}</p>
+          <p className="product-price-large">₹{(selectedVariant?.price || product.price).toFixed(2)}</p>
           
           <div className="product-description">
             <p>{product.description}</p>
@@ -161,17 +213,19 @@ if (!product) return <div className="loading">Product not found</div>;
               <div className="quantity-selector ">
                 <button onClick={() => setQuantity(q => Math.max(1, q - 1))}><Minus size={16} /></button>
                 <input type="number" value={quantity} readOnly />
-                <button onClick={() => setQuantity(q => q + 1)}><Plus size={16} /></button>
+                <button onClick={() => setQuantity(q =>
+    Math.min(q + 1, selectedVariant?.stock || product.stock || 1)
+  )}><Plus size={16} /></button>
               </div>
               
               <button
   className="btn btn-text add-to-cart-btn-full animate-slide-up delay-200"
   onClick={handleAddToCart}
-  disabled={adding}
+  disabled={adding || isOutOfStock}
 >
-  {adding ? "ADDING..." : "ADD TO CART"}
+  {isOutOfStock ? "OUT OF STOCK" : adding ? "ADDING..." : "ADD TO CART"}
   <span className="separator">-</span>
-  ${ (product.price * quantity).toFixed(2) }
+  ₹{ ((selectedVariant?.price || product.price) * quantity).toFixed(2) }
 </button>
             </div>
           </div>

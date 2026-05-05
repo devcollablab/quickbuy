@@ -45,7 +45,7 @@ const maxPrice = 300;
   // Fetch products from backend
   useEffect(() => {
     const fetchProducts = async () => {
-      
+      debugger;
       try {
         setLoading(true);
         setError(null);

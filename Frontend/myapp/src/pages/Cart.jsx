@@ -11,7 +11,7 @@ const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
 
   const fetchCart = async () => {
-    
+    debugger;
     try {
       const res = await customAxios.get(urlGetCart);
       setCartItems(res.data.items || []);
@@ -24,10 +24,11 @@ const Cart = () => {
     fetchCart();
   }, []);
 
-  const updateQty = async (product_id, quantity) => {
+  const updateQty = async (product_id, variant_id, quantity) => {
     try {
       await customAxios.put(urlUpdateCart, {
         product_id,
+        variant_id, // 🔥 IMPORTANT
         quantity
       });
       fetchCart();
@@ -36,9 +37,14 @@ const Cart = () => {
     }
   };
 
-  const removeItem = async (product_id) => {
+  const removeItem = async (product_id, variant_id) => {
     try {
-      await customAxios.delete(urlDeleteCart(product_id));
+      await customAxios.delete(urlDeleteCart, {
+        params: {
+          product_id,
+          variant_id
+        }
+      });
       fetchCart();
     } catch (err) {
       console.error("Remove failed", err);
@@ -81,7 +87,7 @@ const Cart = () => {
           </div>
 
           {cartItems.map((item) => (
-            <div key={item.id} className="cart-item">
+            <div key={`${item.product_id}-${item.variant_id || "no-variant"}`} className="cart-item">
               <div className="cart-item-product">
                 <Link to={`/product/${item.id}`}>
                   <img src={item.image_url} alt={item.name} />
@@ -91,32 +97,32 @@ const Cart = () => {
                   <Link to={`/product/${item.id}`}>
                     <h3>{item.name}</h3>
                   </Link>
-                  <p className="mobile-price">${item.price.toFixed(2)}</p>
+                  <p className="mobile-price">₹{item.price.toFixed(2)}</p>
                 </div>
               </div>
               
               <div className="cart-item-price desktop-only">
-                ${item.price.toFixed(2)}
+              ₹{item.price.toFixed(2)}
               </div>
 
               <div className="cart-item-quantity">
                 <div className="quantity-selector-sm">
-                  <button onClick={() => updateQty(item.product_id, item.quantity - 1)} disabled={item.quantity <= 1}>
+                  <button onClick={() => updateQty(item.product_id, item.variant_id, item.quantity - 1)} disabled={item.quantity <= 1}>
                     <Minus size={14} />
                   </button>
                   <input type="number" value={item.quantity} readOnly />
-                  <button onClick={() => updateQty(item.product_id, item.quantity + 1)}>
+                  <button onClick={() => updateQty(item.product_id, item.variant_id, item.quantity + 1)}>
                     <Plus size={14} />
                   </button>
                 </div>
               </div>
 
               <div className="cart-item-subtotal desktop-only">
-                ${(item.price * item.quantity).toFixed(2)}
+              ₹{(item.price * item.quantity).toFixed(2)}
               </div>
 
               <div className="cart-item-remove">
-                <button onClick={() => removeItem(item.product_id)} aria-label="Remove item">
+                <button onClick={() => removeItem(item.product_id, item.variant_id)} aria-label="Remove item">
                   <Trash2 size={18} />
                 </button>
               </div>
@@ -128,7 +134,7 @@ const Cart = () => {
           <h2>Order Summary</h2>
           <div className="summary-row">
             <span>Subtotal ({cartItems.length} items)</span>
-            <span>${cartTotal.toFixed(2)}</span>
+            <span>₹{cartTotal.toFixed(2)}</span>
           </div>
           <div className="summary-row">
             <span>Shipping</span>
@@ -136,7 +142,7 @@ const Cart = () => {
           </div>
           <div className="summary-row total">
             <span>Total</span>
-            <span>${cartTotal.toFixed(2)}</span>
+            <span>₹{cartTotal.toFixed(2)}</span>
           </div>
           
           <Link to="/checkout" className="btn btn-accent checkout-btn">

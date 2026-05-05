@@ -32,6 +32,7 @@ const [toast, setToast] = useState({ message: "", type: "success" });
 
   // ---------------- FETCH CART ----------------
   const fetchCart = async () => {
+    debugger;
     try {
       const res = await customAxios.get(urlGetCart);
       setCartItems(res.data.items || []);
@@ -514,7 +515,7 @@ const [toast, setToast] = useState({ message: "", type: "success" });
 </div>
           {/* ================= PAYMENT ================= */}
 
-          <div className="form-section">
+          {/* <div className="form-section">
             <h2>Payment Method</h2>
 
             <div className="payment-methods">
@@ -540,9 +541,9 @@ const [toast, setToast] = useState({ message: "", type: "success" });
                 />
                 Cash on Delivery
               </label> */}
-
+{/* 
             </div>
-          </div>
+          </div>  */}
 
           <button 
           type = "button"
@@ -573,7 +574,7 @@ const [toast, setToast] = useState({ message: "", type: "success" });
                 </div>
 
                 <div className="summary-item-price">
-                  ${(item.price * item.quantity).toFixed(2)}
+                ₹{(item.price * item.quantity).toFixed(2)}
                 </div>
 
               </div>
@@ -586,7 +587,7 @@ const [toast, setToast] = useState({ message: "", type: "success" });
 
             <div className="summary-row">
               <span>Subtotal</span>
-              <span>${cartTotal.toFixed(2)}</span>
+              <span>₹{cartTotal.toFixed(2)}</span>
             </div>
 
             <div className="summary-row">
@@ -596,7 +597,7 @@ const [toast, setToast] = useState({ message: "", type: "success" });
 
             <div className="summary-row total">
               <span>Total</span>
-              <span>${cartTotal.toFixed(2)}</span>
+              <span>₹{cartTotal.toFixed(2)}</span>
             </div>
 
           </div>

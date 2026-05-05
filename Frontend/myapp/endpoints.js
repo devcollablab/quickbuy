@@ -33,8 +33,9 @@ export const urlCreateProfile = `${baseURL}/api/v1/profile/`;
 export const urlGetCart = `${baseURL}/api/v1/cart/`;
 export const urlAddToCart = `${baseURL}/api/v1/cart/add`;
 export const urlUpdateCart = `${baseURL}/api/v1/cart/update`;
-export const urlDeleteCart = (productId) => 
-  `${baseURL}/api/v1/cart/remove/${productId}`; 
+export const urlDeleteCart = `${baseURL}/api/v1/cart/remove`;
+// export const urlDeleteCart = (productId) => 
+//   `${baseURL}/api/v1/cart/remove/${productId}`; 
 
   export const urlCreateOrder = `${baseURL}/api/v1/payment/create-order`;
   export const urlVerifyPayment = `${baseURL}/api/v1/orders/verify-payment`;  
