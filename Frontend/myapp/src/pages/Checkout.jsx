@@ -5,6 +5,7 @@ import customAxios from "../components/customAxios";
 import { urlCreateOrder, urlGetCart, urlGetProfile, urlUpdateProfile, urlVerifyPayment } from "../../endpoints";
 import "../styles/Checkout.css";
 import Toast from "../components/Toast";
+import { v4 as uuidv4 } from "uuid";
 
 const Checkout = () => {
 
@@ -87,6 +88,7 @@ const [toast, setToast] = useState({ message: "", type: "success" });
   };
 
   const payNow = async () => {
+    const idempotencyKey = uuidv4();
     const loaded = await loadRazorpay();
   
     if (!loaded) {
@@ -133,7 +135,13 @@ const [toast, setToast] = useState({ message: "", type: "success" });
             razorpay_order_id: response.razorpay_order_id,
             razorpay_payment_id: response.razorpay_payment_id,
             razorpay_signature: response.razorpay_signature
-          });
+          },
+          {
+            headers: {
+              "Idempotency-Key": idempotencyKey // ✅ THIS IS THE KEY PART
+            }
+          }
+          );
   
           alert("Order ID: " + verifyRes.data.order_id);
           setToast({
