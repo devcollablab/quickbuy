@@ -1,29 +1,29 @@
 from fastapi import Depends, HTTPException, status, Header
 from app.auth import get_current_user  # CORRECT IMPORT
+from app.config import settings
 
-ADMIN_SECRET_KEY = "SUPER_SECRET_ADMIN_KEY_12345"
+ADMIN_SECRET_KEY = settings.ADMIN_SECRET_KEY
 
 
 def admin_required(
     user=Depends(get_current_user),
     x_admin_key: str | None = Header(default=None),
 ):
-    """
-    Admin-only access:
-    1. Valid JWT
-    2. User role must be admin
-    3. Optional admin secret header (extra security)
-    """
-
-    # 🔒 Role-based protection (MAIN)
+    # Role-based protection
     if user.role != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin access only"
         )
 
-    # 🔐 Optional secret header (defense in depth)
-    if x_admin_key is not None and x_admin_key != ADMIN_SECRET_KEY:
+    # Mandatory admin secret key
+    if not x_admin_key:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin secret key required"
+        )
+
+    if x_admin_key != ADMIN_SECRET_KEY:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Invalid admin secret key"

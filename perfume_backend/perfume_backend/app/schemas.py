@@ -1,12 +1,32 @@
-from pydantic import BaseModel, EmailStr
-from typing import Optional
+from pydantic import BaseModel, EmailStr, field_validator, model_validator, ConfigDict
 from datetime import datetime
-from typing import List, Dict, Any
+from typing import Optional, List, Dict, Any
+import re
+import phonenumbers
 # ================= AUTH / USERS =================
 
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
+
+    @field_validator("password", mode="after")
+    def validate_password(cls, v):
+        if len(v) < 8:
+            raise ValueError("Password must be at least 8 characters")
+
+        if not re.search(r"[A-Z]", v):
+            raise ValueError("Password must contain uppercase letter")
+
+        if not re.search(r"[a-z]", v):
+            raise ValueError("Password must contain lowercase letter")
+
+        if not re.search(r"\d", v):
+            raise ValueError("Password must contain digit")
+
+        if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", v):
+            raise ValueError("Password must contain special character")
+
+        return v
 
 
 class UserLogin(BaseModel):
@@ -28,6 +48,25 @@ class ResetPassword(BaseModel):
     otp: str
     new_password: str
 
+    @field_validator("new_password", mode="after")
+    def validate_password(cls, v):
+        if len(v) < 8:
+            raise ValueError("Password must be at least 8 characters")
+
+        if not re.search(r"[A-Z]", v):
+            raise ValueError("Password must contain uppercase letter")
+
+        if not re.search(r"[a-z]", v):
+            raise ValueError("Password must contain lowercase letter")
+
+        if not re.search(r"\d", v):
+            raise ValueError("Password must contain digit")
+
+        if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", v):
+            raise ValueError("Password must contain special character")
+
+        return v
+
 
 class UserOut(BaseModel):
     id: int
@@ -47,6 +86,8 @@ class Token(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
+    access_token_expires_in: int
+    refresh_token_expires_in: int
 
 
 class AdminToken(BaseModel):
@@ -60,15 +101,23 @@ class ProductBase(BaseModel):
     name: str
     brand: str
     description: Optional[str] = None
-    price: float
-    stock: int
+    price: Optional[float] = None
+    stock: Optional[int] = None
     category: Optional[str] = None
     image_url: Optional[str] = None
 
 
 class ProductCreate(ProductBase):
-    pass
 
+    @model_validator(mode="after")
+    def validate_product(cls, values):
+        price = values.price
+        stock = values.stock
+
+        if price is None:
+            raise ValueError("Either provide price or create variants later")
+
+        return values
 
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
@@ -79,17 +128,6 @@ class ProductUpdate(BaseModel):
     category: Optional[str] = None
     image_url: Optional[str] = None
     is_active: Optional[bool] = None
-
-
-class ProductOut(ProductBase):
-    id: int
-    is_active: bool
-    created_at: datetime
-    updated_at: Optional[datetime]
-
-    class Config:
-        from_attributes = True
-
 
 # ================= CART =================
 
@@ -142,17 +180,32 @@ class OrderOut(BaseModel):
 # ================= USER PROFILE =================
 
 class UserProfileCreate(BaseModel):
-    full_name: str
+    full_name: Optional[str] = None
     phone_number: str
-    gender: str
-    address_line: str
-    city: str
-    state: str
-    pincode: str
-    country: str
+    gender: Optional[str] = None
+    address_line: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    pincode: Optional[str] = None
+    country: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
 
+    @field_validator("phone_number", mode="after")
+    def validate_phone(cls, v):
+        try:
+            parsed = phonenumbers.parse(v, "IN")
+
+            if not phonenumbers.is_valid_number(parsed):
+                raise ValueError("Invalid phone number")
+
+            return phonenumbers.format_number(
+                parsed,
+                phonenumbers.PhoneNumberFormat.E164
+            )
+
+        except phonenumbers.NumberParseException:
+            raise ValueError("Invalid phone number format")
 
 class UserProfileUpdate(BaseModel):
     full_name: Optional[str] = None
@@ -203,15 +256,45 @@ class ProfileAvatarOut(BaseModel):
 
 class SelectAvatarRequest(BaseModel):
     avatar_id: int
+    
+class GoogleLoginRequest(BaseModel):
+    id_token: str
+
+class CartRequest(BaseModel):
+    product_id: int
+    size_ml: Optional[int] = None
+    quantity: int
+    variant_id: Optional[int] = None
+class VariantOut(BaseModel):
+    id: int
+    size_ml: Optional[int]
+    price: float
+    stock: int
+    model_config = ConfigDict(from_attributes=True)
+
+class ProductOut(BaseModel):
+    id: int
+    name: str
+    brand: str
+    description: Optional[str]
+    price: float
+    stock: Optional[int] = None
+    has_variants: bool
+    category: Optional[str]
+    image_url: Optional[str] = None
+    images: Optional[List[str]] = None
+    is_active: bool
+    variants: Optional[List[VariantOut]] = None
+
+    model_config = ConfigDict(from_attributes=True)
 
 class ProductV2Out(BaseModel):
     id: int
     name: str
     brand: str
     description: Optional[str]
-    price: float
-    stock: int
     category: Optional[str]
     images: List[Dict[str, Any]]
-    class Config:
-        from_attributes = True
+    variants: Optional[List[VariantOut]] = None
+
+    model_config = ConfigDict(from_attributes=True)

@@ -53,11 +53,14 @@ const Cart = () => {
 
   if (cartItems.length === 0) {
     return (
-      <div className="cart-page empty-cart container text-center">
+      <div className="cart-page empty-cart container text-center"
+      style={{ marginTop: "60px" }}>
         <h2>Your Cart is Empty</h2>
         <p>Looks like you haven't added any premium fragrances to your cart yet.</p>
         <Link to="/shop" className="btn btn-accent empty-cart-btn">Discover Our Collection</Link>
-        <Link to="/profile" className="btn btn-accent empty-cart-btn">Please login</Link>
+        
+        <p>Check whether you are logged in or not...</p>
+        <Link to="/profile" className="btn btn-accent empty-cart-btn">Check login</Link>
       </div>
     );
   }

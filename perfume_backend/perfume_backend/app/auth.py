@@ -3,10 +3,11 @@ from typing import Optional
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import jwt, JWTError
+import jwt
+from jwt.exceptions import InvalidTokenError
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
-
+from app.database import get_db
 from app.database import SessionLocal
 from app.models import User
 from app.config import settings
@@ -46,8 +47,11 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 #         algorithm=settings.ALGORITHM,
 #     )
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
-
+def create_access_token(
+    data: dict,
+    expires_delta: timedelta | None = None,
+    token_type: str = "access"
+):
     to_encode = data.copy()
 
     if expires_delta:
@@ -57,7 +61,10 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
 
-    to_encode.update({"exp": expire})
+    to_encode.update({
+        "exp": expire,
+        "type": token_type   
+    })
 
     encoded_jwt = jwt.encode(
         to_encode,
@@ -69,18 +76,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 
 # ======================
-# DB DEPENDENCY
-# ======================
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-# ======================
-# CURRENT USER (FIXED ✅)
+# CURRENT USER
 # ======================
 def get_current_user(
     token: str = Depends(oauth2_scheme),
@@ -99,11 +95,19 @@ def get_current_user(
             algorithms=[settings.ALGORITHM],
         )
 
+        # ADD THIS
+        token_type = payload.get("type")
+        if token_type != "access":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token type"
+            )
+
         user_id: str | None = payload.get("sub")
         if user_id is None:
             raise credentials_exception
 
-    except JWTError:
+    except InvalidTokenError:
         raise credentials_exception
 
     user = db.query(User).filter(User.id == int(user_id)).first()

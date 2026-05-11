@@ -1,27 +1,34 @@
 from fastapi import APIRouter, Depends, HTTPException, Response
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List
 from io import BytesIO
 from datetime import datetime
-
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
-
 from app.database import get_db
-from app.models import Order, OrderItem, User, Product
+from app.models import Order, OrderItem
 from app.auth import get_current_user
+from concurrent.futures import ThreadPoolExecutor
+import asyncio
+
+# Thread pool for CPU-heavy tasks
+executor = ThreadPoolExecutor(max_workers=4)
 
 router = APIRouter(prefix="/admin/orders", tags=["Admin Orders"])
 
 
-# 🔐 ADMIN GUARD
+# =========================
+# ADMIN GUARD
+# =========================
 def get_admin(user=Depends(get_current_user)):
     if user.role != "admin":
         raise HTTPException(status_code=403, detail="Admin access only")
     return user
 
 
-# 1️⃣ LIST ORDERS BY STATUS
+# =========================
+# LIST ORDERS BY STATUS
+# =========================
 @router.get("")
 def get_orders(
     status: str = "PENDING",
@@ -37,32 +44,10 @@ def get_orders(
     return orders
 
 
-# 2️⃣ PENDING → PROCESSING (WITH PDF)
-@router.post("/batch-process")
-def batch_process_orders(
-    order_ids: List[int],
-    db: Session = Depends(get_db),
-    admin=Depends(get_admin)
-):
-    if not order_ids:
-        raise HTTPException(status_code=400, detail="No order IDs provided")
-
-    orders = (
-        db.query(Order)
-        .filter(
-            Order.id.in_(order_ids),
-            Order.order_status == "PENDING"
-        )
-        .all()
-    )
-
-    if not orders:
-        raise HTTPException(
-            status_code=400,
-            detail="No valid PENDING orders found"
-        )
-
-    # 📄 CREATE PDF
+# =========================
+# SYNC PDF GENERATION
+# =========================
+def _generate_pdf(orders):
     buffer = BytesIO()
     pdf = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
@@ -77,8 +62,8 @@ def batch_process_orders(
     y -= 30
 
     for order in orders:
-        user = db.query(User).filter(User.id == order.user_id).first()
-        items = db.query(OrderItem).filter(OrderItem.order_id == order.id).all()
+        user = order.user
+        items = order.items
 
         pdf.setFont("Helvetica-Bold", 11)
         pdf.drawString(50, y, f"Order ID: {order.id}")
@@ -89,17 +74,23 @@ def batch_process_orders(
         y -= 15
         pdf.drawString(50, y, f"Total Amount: ₹{order.total_amount}")
         y -= 15
-        pdf.drawString(50, y, f"Status: PROCESSING")
+        pdf.drawString(50, y, f"Status: {order.order_status}")
         y -= 15
 
         pdf.drawString(50, y, "Items:")
         y -= 15
 
         for item in items:
+            product = getattr(item, "product", None)
+            variant = getattr(item, "variant", None)
+
+            product_name = product.name if product else "Deleted product"
+            size_info = f"{variant.size_ml}ml" if variant and variant.size_ml else "Standard"
+
             pdf.drawString(
                 70,
                 y,
-                f"- Product ID {item.product_id} | Qty {item.quantity} | Price ₹{item.price_at_purchase}"
+                f"- {product_name} | {size_info} | Qty {item.quantity} | Price ₹{item.price_at_purchase}"
             )
             y -= 15
 
@@ -108,12 +99,64 @@ def batch_process_orders(
             pdf.showPage()
             y = height - 50
 
+    pdf.save()
+    buffer.seek(0)
+
+    return buffer
+
+
+# =========================
+# ASYNC WRAPPER
+# =========================
+async def generate_pdf_async(orders):
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(
+        executor,
+        _generate_pdf,
+        orders
+    )
+
+
+# =========================
+# PENDING → PROCESSING (WITH PDF)
+# =========================
+@router.post("/batch-process")
+async def batch_process_orders(
+    order_ids: List[int],
+    db: Session = Depends(get_db),
+    admin=Depends(get_admin)
+):
+    if not order_ids:
+        raise HTTPException(status_code=400, detail="No order IDs provided")
+
+    orders = (
+        db.query(Order)
+        .options(
+            joinedload(Order.items).joinedload(OrderItem.variant),
+            joinedload(Order.items).joinedload(OrderItem.product),
+            joinedload(Order.user)
+        )
+        .filter(
+            Order.id.in_(order_ids),
+            Order.order_status == "PENDING"
+        )
+        .all()
+    )
+
+    if not orders:
+        raise HTTPException(
+            status_code=400,
+            detail="No valid PENDING orders found"
+        )
+
+    # Generate PDF asynchronously
+    buffer = await generate_pdf_async(orders)
+
+    # Update order status
+    for order in orders:
         order.order_status = "PROCESSING"
 
     db.commit()
-
-    pdf.save()
-    buffer.seek(0)
 
     return Response(
         content=buffer.read(),
@@ -124,7 +167,9 @@ def batch_process_orders(
     )
 
 
-# 3️⃣ PROCESSING → COMPLETED (STOCK DEDUCTION)
+# =========================
+# PROCESSING → COMPLETED
+# =========================
 @router.post("/complete")
 def complete_orders(
     order_ids: List[int],
@@ -149,27 +194,7 @@ def complete_orders(
             detail="No PROCESSING orders found"
         )
 
-    # 🔒 TRANSACTION-SAFE STOCK DEDUCTION
     for order in orders:
-        items = db.query(OrderItem).filter(OrderItem.order_id == order.id).all()
-
-        for item in items:
-            product = db.query(Product).filter(Product.id == item.product_id).first()
-
-            if not product:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Product {item.product_id} not found"
-                )
-
-            if product.stock < item.quantity:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Insufficient stock for product {product.id}"
-                )
-
-            product.stock -= item.quantity
-
         order.order_status = "COMPLETED"
 
     db.commit()

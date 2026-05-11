@@ -244,28 +244,27 @@ const maxPrice = 300;
     Price Range
   </h3>
 
-  {/* Price Labels */}
-  <div className="flex justify-between text-sm font-medium text-gray-700 mb-3">
+  {/* Labels */}
+  <div className="flex justify-between text-sm text-gray-600 mb-3">
     <span>₹{priceRange[0]}</span>
     <span>₹{priceRange[1]}</span>
   </div>
 
-  {/* Slider */}
   <div className="relative h-6">
     
-    {/* Track background */}
-    <div className="absolute top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 rounded-full" />
+    {/* Base Track */}
+    <div className="absolute top-1/2 -translate-y-1/2 w-full h-[2px] bg-gray-300 rounded-full" />
 
-    {/* Active track */}
+    {/* Active Pink Track */}
     <div
-      className="absolute top-1/2 -translate-y-1/2 h-1 bg-blue-600 rounded-full"
+      className="absolute top-1/2 -translate-y-1/2 h-[2px] bg-pink-500 rounded-full"
       style={{
         left: `${(priceRange[0] / maxPrice) * 100}%`,
         right: `${100 - (priceRange[1] / maxPrice) * 100}%`,
       }}
     />
 
-    {/* Min slider */}
+    {/* Min Slider */}
     <input
       type="range"
       min={minPrice}
@@ -277,18 +276,20 @@ const maxPrice = 300;
           priceRange[1],
         ])
       }
-      className="absolute w-full appearance-none pointer-events-none bg-transparent
+      className="absolute w-full appearance-none bg-transparent pointer-events-none
                  [&::-webkit-slider-thumb]:pointer-events-auto
                  [&::-webkit-slider-thumb]:appearance-none
-                 [&::-webkit-slider-thumb]:h-4
-                 [&::-webkit-slider-thumb]:w-4
+                 [&::-webkit-slider-thumb]:h-5
+                 [&::-webkit-slider-thumb]:w-5
                  [&::-webkit-slider-thumb]:rounded-full
-                 [&::-webkit-slider-thumb]:bg-blue-600
-                 [&::-webkit-slider-thumb]:cursor-pointer
-                 [&::-webkit-slider-thumb]:shadow-md"
+                 [&::-webkit-slider-thumb]:bg-white
+                 [&::-webkit-slider-thumb]:border-2
+                 [&::-webkit-slider-thumb]:border-pink-500
+                 [&::-webkit-slider-thumb]:shadow
+                 [&::-webkit-slider-thumb]:cursor-pointer"
     />
 
-    {/* Max slider */}
+    {/* Max Slider */}
     <input
       type="range"
       min={minPrice}
@@ -302,12 +303,14 @@ const maxPrice = 300;
       }
       className="absolute w-full appearance-none bg-transparent
                  [&::-webkit-slider-thumb]:appearance-none
-                 [&::-webkit-slider-thumb]:h-4
-                 [&::-webkit-slider-thumb]:w-4
+                 [&::-webkit-slider-thumb]:h-5
+                 [&::-webkit-slider-thumb]:w-5
                  [&::-webkit-slider-thumb]:rounded-full
-                 [&::-webkit-slider-thumb]:bg-blue-600
-                 [&::-webkit-slider-thumb]:cursor-pointer
-                 [&::-webkit-slider-thumb]:shadow-md"
+                 [&::-webkit-slider-thumb]:bg-white
+                 [&::-webkit-slider-thumb]:border-2
+                 [&::-webkit-slider-thumb]:border-pink-500
+                 [&::-webkit-slider-thumb]:shadow
+                 [&::-webkit-slider-thumb]:cursor-pointer"
     />
   </div>
 </div>

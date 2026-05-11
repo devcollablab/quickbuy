@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import User
 from app.schemas import UserLogin, AdminToken
 from app.auth import verify_password, create_access_token
+from app.core.csrf import validate_csrf_token
 
 router = APIRouter(
     prefix="/admin/auth",
@@ -17,28 +18,31 @@ router = APIRouter(
 # ====================================
 @router.post("/login", response_model=AdminToken)
 def admin_login(
+    request: Request,
     data: UserLogin,
     db: Session = Depends(get_db)
 ):
+    # CSRF Protection for state-changing operation
+    validate_csrf_token(request)
 
-    # 1️⃣ Find user
+    # Find user
     admin = db.query(User).filter(User.email == data.email).first()
 
-    # 2️⃣ Check credentials
+    # Check credentials
     if not admin or not verify_password(data.password, admin.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
         )
 
-    # 3️⃣ Ensure admin role
+    # Ensure admin role
     if admin.role != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not an admin account"
         )
 
-    # 4️⃣ Create access token
+    # Create access token
     access_token = create_access_token(
         data={
             "sub": str(admin.id),
@@ -46,7 +50,7 @@ def admin_login(
         }
     )
 
-    # 5️⃣ Return token
+    # Return token
     return {
         "access_token": access_token,
         "token_type": "bearer"

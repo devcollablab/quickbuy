@@ -11,7 +11,12 @@ DATABASE_URL = (
 
 engine = create_engine(
     DATABASE_URL,
-    pool_pre_ping=True
+    pool_pre_ping=True,     # Check connections before using
+    pool_size=5,            # Base number of connections
+    max_overflow=10,        # Extra connections during high load
+    pool_timeout=30,        # Wait max 30s for connection
+    pool_recycle=1800,      # Recycle after 30 minutes
+    echo=False              # Set True only for debugging
 )
 
 SessionLocal = sessionmaker(
@@ -24,7 +29,7 @@ SessionLocal = sessionmaker(
 Base = declarative_base()
 
 
-# ✅ THIS IS WHAT WAS MISSING
+# THIS IS WHAT WAS MISSING
 def get_db():
     db = SessionLocal()
     try:

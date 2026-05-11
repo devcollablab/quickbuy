@@ -6,6 +6,7 @@ import { urlCreateOrder, urlGetCart, urlGetProfile, urlUpdateProfile, urlVerifyP
 import "../styles/Checkout.css";
 import Toast from "../components/Toast";
 import { v4 as uuidv4 } from "uuid";
+// check
 
 const Checkout = () => {
 
@@ -143,7 +144,7 @@ const [toast, setToast] = useState({ message: "", type: "success" });
           }
           );
   
-          alert("Order ID: " + verifyRes.data.order_id);
+          // alert("Order ID: " + verifyRes.data.order_id);
           setToast({
             message: "Payment Success!",
             type: "success"
