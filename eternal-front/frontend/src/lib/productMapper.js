@@ -17,13 +17,13 @@ function normalizeImages(product) {
 }
 
 function mapCategory(apiCategory) {
-  const c = (apiCategory || "").toLowerCase();
+  const c = String(apiCategory || "").toLowerCase().trim();
 
-  if (c.includes("men")) return "men";
-  if (c.includes("women")) return "women";
-  if (c.includes("unisex")) return "combo";
-  if (c.includes("gift")) return "combo";
-  if (c.includes("combo")) return "combo";
+  if (c === "women") return "women";
+  if (c === "men") return "men";
+  if (c === "unisex") return "combo";
+  if (c === "gift") return "combo";
+  if (c === "combo") return "combo";
 
   return "men";
 }
@@ -50,6 +50,7 @@ function slugify(name) {
 =========================== */
 
 export function mapApiProductsToCards(apiProducts = []) {
+  
   const cards = [];
 
   for (const p of apiProducts) {

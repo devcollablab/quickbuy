@@ -28,7 +28,7 @@ export default function ComingSoon() {
           <Button
             variant="primary"
             className="mt-8"
-            onClick={() => showToast("You're on the waitlist! (Demo)")}
+            onClick={() => showToast("You're on the waitlist!")}
           >
             Notify Me at Launch
           </Button>

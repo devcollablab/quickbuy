@@ -301,7 +301,7 @@ const handleAddToCart = () => {
               <div className="flex items-center gap-3 glass rounded-lg p-4">
                 <Truck className="w-5 h-5 text-gold" />
                 <div>
-                  <p className="font-medium">Free Delivery</p>
+                  <p className="font-medium">Fast Delivery</p>
                   <p className="text-stone-400 text-xs">3-5 business days</p>
                 </div>
               </div>

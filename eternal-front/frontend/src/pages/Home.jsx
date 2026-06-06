@@ -4,7 +4,7 @@ import FeaturedCollections from "../components/home/FeaturedCollections";
 import BestSellers from "../components/home/BestSellers";
 import StatsSection from "../components/home/StatsSection";
 import Testimonials from "../components/home/Testimonials";
-import Newsletter from "../components/home/Newsletter";
+// import Newsletter from "../components/home/Newsletter";
 import SectionHeading from "../components/ui/SectionHeading";
 import ComingSoonCard from "../components/products/ComingSoonCard";
 import { comingSoonProducts } from "../data/products";
@@ -38,7 +38,7 @@ export default function Home() {
         </ScrollReveal>
       </section>
       <Testimonials />
-      <Newsletter />
+      
     </>
   );
 }
