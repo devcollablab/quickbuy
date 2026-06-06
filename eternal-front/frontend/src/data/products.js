@@ -129,11 +129,11 @@ export const collections = [
   },
   {
     id: "combo",
-    title: "Gift Sets",
+    title: "Coming-Soon",
     subtitle: "Curated Duos",
     image: img("comboGift"),
     fallback: FALLBACK.comboGift,
-    path: "/collection?filter=combo",
+    path: "/coming-soon",
   },
 ];
 

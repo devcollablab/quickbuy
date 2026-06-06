@@ -10,7 +10,7 @@ const filters = [
   { id: "all", label: "All" },
   { id: "men", label: "Men's" },
   { id: "women", label: "Women's" },
-  { id: "combo", label: "Gift Sets" },
+  
 ];
 
 export default function Collection() {

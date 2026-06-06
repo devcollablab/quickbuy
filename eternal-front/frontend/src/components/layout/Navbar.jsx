@@ -70,15 +70,15 @@ export default function Navbar() {
             {!authLoading && (
               user ? (
                 <div className="hidden sm:flex items-center gap-2">
-                  <span className="text-xs text-stone-500 max-w-[120px] truncate">{user.email}</span>
-                  <button
+                  <span className="text-xs text-stone-500 max-w-[120px] truncate">{user?.email?.split("@")[0]}</span>
+                  {/* <button
                     type="button"
                     onClick={logout}
                     className="p-2 rounded-full hover:bg-stone-100"
                     aria-label="Sign out"
                   >
                     <LogOut className="w-5 h-5" />
-                  </button>
+                  </button> */}
                 </div>
               ) : (
                 <button
@@ -94,9 +94,9 @@ export default function Navbar() {
             <button onClick={() => setSearchOpen(true)} className="p-2 rounded-full hover:bg-stone-100" aria-label="Search">
               <Search className="w-5 h-5" />
             </button>
-            <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-stone-100" aria-label="Toggle theme">
+            {/* <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-stone-100" aria-label="Toggle theme">
               {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
+            </button> */}
             <button onClick={() => navigate("/collection")} className="p-2 rounded-full hover:bg-stone-100 relative" aria-label="Wishlist">
               <Heart className="w-5 h-5" />
               {wishCount > 0 && (

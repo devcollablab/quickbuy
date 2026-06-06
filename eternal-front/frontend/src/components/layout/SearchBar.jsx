@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, X } from "lucide-react";
@@ -11,18 +11,26 @@ export default function SearchBar({ open, onClose }) {
   const navigate = useNavigate();
   const { catalog } = useProducts();
 
+  useEffect(() => {
+    if (!open) {
+      setQuery("");
+    }
+  }, [open]);
+
   const results = useMemo(() => {
     if (!query.trim()) return [];
+  
     const q = query.toLowerCase();
+  
     return catalog
       .filter(
         (p) =>
-          p.name.toLowerCase().includes(q) ||
+          p.name?.toLowerCase().includes(q) ||
           p.volume?.toLowerCase().includes(q) ||
-          p.category?.includes(q) ||
+          p.category?.toLowerCase().includes(q) ||
           p.gender?.toLowerCase().includes(q)
       )
-      .slice(6);
+      .slice(0, 6);
   }, [query, catalog]);
 
   const goToProduct = (id) => {
