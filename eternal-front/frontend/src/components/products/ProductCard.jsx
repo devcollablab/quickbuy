@@ -10,7 +10,7 @@ import SafeImage from "../ui/SafeImage";
 import { useAuth } from "../../context/AuthContext";
 
 export default function ProductCard({ product, index = 0 }) {
-  debugger;
+  
   const { addToCart } = useCart();
   const { toggleWishlist, isWishlisted } = useWishlist();
   const { showToast } = useToast();
