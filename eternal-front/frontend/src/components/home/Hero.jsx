@@ -5,8 +5,26 @@ import Button from "../ui/Button";
 import SmokeParticles from "./SmokeParticles";
 import SafeImage from "../ui/SafeImage";
 import { IMG } from "../../data/products";
+import { useState, useEffect } from "react";
 
 export default function Hero() {
+  const banners = [
+    IMG.hero,
+    IMG.banner1,
+    IMG.banner2,
+    
+  ];
+
+  const [currentBanner, setCurrentBanner] = useState(0);
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    setCurrentBanner((prev) => (prev + 1) % banners.length);
+  }, 3000); // change every 3 sec
+
+  return () => clearInterval(interval);
+}, []);
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-cream">
       <div
@@ -78,13 +96,22 @@ export default function Hero() {
             className="relative"
           >
             <div className="absolute inset-0 blur-3xl bg-gold/25 rounded-full scale-75" />
-            <SafeImage
-              src={IMG.hero}
-              fallback={IMG.heroFallback}
-              alt="Eternal Stand perfume"
-              className="relative w-full max-h-[320px] md:max-h-[400px] object-contain drop-shadow-2xl mx-auto"
-            />
-          </motion.div>
+
+<motion.div
+  key={currentBanner}
+  initial={{ opacity: 0, scale: 0.95 }}
+  animate={{ opacity: 1, scale: 1 }}
+  exit={{ opacity: 0 }}
+  transition={{ duration: 0.8 }}
+>
+  <SafeImage
+    src={banners[currentBanner]}
+    fallback={IMG.heroFallback}
+    alt={`Banner ${currentBanner + 1}`}
+    className="relative w-full max-h-[320px] md:max-h-[400px] object-contain drop-shadow-2xl mx-auto"
+  />
+</motion.div>
+        </motion.div>
         </motion.div>
       </div>
 

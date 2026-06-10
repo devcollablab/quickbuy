@@ -142,6 +142,10 @@ export const IMG = {
   heroFallback: FALLBACK.heroBrand,
   lifestyle: img("lifestyleBoutique"),
   lifestyleFallback: FALLBACK.lifestyleBoutique,
+  banner1: img("banners"),
+  banner1Fallback: FALLBACK.banners,
+  banner2: img("bannerss"),
+  banner2Fallback: FALLBACK.bannerss,
 };
 
 export const testimonials = [

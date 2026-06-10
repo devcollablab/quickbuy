@@ -86,11 +86,13 @@ export default function Collection() {
         {loading ? (
           <p className="text-center text-stone-500 py-20">Loading collection...</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {filtered.map((p, i) => (
-              <ProductCard key={p.id} product={p} index={i} />
-            ))}
-          </div>
+          <div className="max-w-4xl mx-auto">
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8 md:gap-10 justify-items-center">
+    {filtered.map((p, i) => (
+      <ProductCard key={p.id} product={p} index={i} />
+    ))}
+  </div>
+</div>
         )}
       </div>
     </motion.div>
